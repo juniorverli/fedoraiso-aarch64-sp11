@@ -1,0 +1,11 @@
+# Accelerometer Mount Matrix for Microsoft Surface Pro 11 (LCD)
+# Matches ACPI and IIO sensor devices to align landscape/portrait orientation with Mutter
+
+sensor:modalias:acpi:MSHW048A*:dmi:bvn*:bvr*:bd*:svnMicrosoftCorporation:pnSurfacePro,11thEdition:*
+ ACCEL_MOUNT_MATRIX=0, 1, 0; 1, 0, 0; 0, 0, 1
+
+sensor:modalias:platform:qcom-sns-accel*:dmi:bvn*:bvr*:bd*:svnMicrosoftCorporation:pnSurfacePro,11thEdition:*
+ ACCEL_MOUNT_MATRIX=0, 1, 0; 1, 0, 0; 0, 0, 1
+
+sensor:modalias:platform:iio-sensor-proxy*:dmi:bvn*:bvr*:bd*:svnMicrosoftCorporation:pnSurfacePro,11thEdition:*
+ ACCEL_MOUNT_MATRIX=0, 1, 0; 1, 0, 0; 0, 0, 1

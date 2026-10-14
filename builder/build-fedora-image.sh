@@ -117,6 +117,15 @@ cp -v /workspace/configs/alsa/ucm2/Qualcomm/x1e80100/*.conf /workspace/output/ro
 mkdir -p /workspace/output/rootfs/etc/pipewire/pipewire.conf.d/
 cp -v /workspace/configs/pipewire/pipewire.conf.d/10-surface-sp11-audio.conf /workspace/output/rootfs/etc/pipewire/pipewire.conf.d/
 
+# Sprint 7: Sensor Hub, Wayland Auto-Rotation & Hexagon NPU
+mkdir -p /workspace/output/rootfs/usr/share/qcom/
+cp -v /workspace/configs/qcom/*.jsn /workspace/output/rootfs/usr/share/qcom/
+mkdir -p /workspace/output/rootfs/etc/udev/hwdb.d/
+cp -v /workspace/configs/udev/61-surface-sp11-sensor.hwdb /workspace/output/rootfs/etc/udev/hwdb.d/
+chroot /workspace/output/rootfs systemd-hwdb update || true
+cp -v /workspace/configs/udev/99-fastrpc.rules /workspace/output/rootfs/etc/udev/rules.d/
+chroot /workspace/output/rootfs systemctl enable iio-sensor-proxy.service || true
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf

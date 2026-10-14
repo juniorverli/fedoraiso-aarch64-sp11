@@ -1,0 +1,6 @@
+# FastRPC Hexagon NPU access rules for Microsoft Surface Pro 11
+# Grants read/write permissions to user sessions for CDSP / HTP local AI workloads
+
+SUBSYSTEM=="misc", KERNEL=="fastrpc-*", MODE="0666", TAG+="uaccess"
+KERNEL=="fastrpc-cdsp", MODE="0666", TAG+="uaccess"
+KERNEL=="fastrpc-adsp", MODE="0660", GROUP="audio"
