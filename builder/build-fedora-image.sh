@@ -97,6 +97,20 @@ mkdir -p /workspace/output/rootfs/etc/iptsd/ /workspace/output/rootfs/usr/share/
 cp -v /workspace/configs/iptsd/surface-pro-11.conf /workspace/output/rootfs/etc/iptsd/iptsd.conf
 cp -v /workspace/configs/iptsd/surface-pro-11.conf /workspace/output/rootfs/usr/share/iptsd/presets/
 
+# Sprint 5: GNOME Wayland & Mesa Adreno Environment & Dconf Tuning
+mkdir -p /workspace/output/rootfs/etc/environment.d/
+cp -v /workspace/configs/environment.d/10-surface-wayland.conf /workspace/output/rootfs/etc/environment.d/
+mkdir -p /workspace/output/rootfs/etc/dconf/db/local.d/
+cp -v /workspace/configs/gnome/00-surface-sp11 /workspace/output/rootfs/etc/dconf/db/local.d/
+mkdir -p /workspace/output/rootfs/etc/dconf/profile/
+echo -e 'user-db:user\nsystem-db:local' > /workspace/output/rootfs/etc/dconf/profile/user
+chroot /workspace/output/rootfs dconf update || true
+
+# Monitors configuration (2880x1920 @ 120Hz, 200% scaling)
+mkdir -p /workspace/output/rootfs/var/lib/gdm/.config/ /workspace/output/rootfs/etc/skel/.config/
+cp -v /workspace/configs/gnome/monitors.xml /workspace/output/rootfs/var/lib/gdm/.config/monitors.xml
+cp -v /workspace/configs/gnome/monitors.xml /workspace/output/rootfs/etc/skel/.config/monitors.xml
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf

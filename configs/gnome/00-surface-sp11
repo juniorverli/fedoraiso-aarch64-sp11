@@ -1,0 +1,37 @@
+# Default GNOME dconf profile for Microsoft Surface Pro 11
+
+[org/gnome/mutter]
+experimental-features=['scale-monitor-framebuffer', 'variable-refresh-rate']
+dynamic-workspaces=true
+center-new-windows=true
+
+[org/gnome/desktop/peripherals/touchpad]
+tap-to-click=true
+natural-scroll=true
+two-finger-scrolling-enabled=true
+click-method='fingers'
+disable-while-typing=true
+
+[org/gnome/desktop/peripherals/touchscreen]
+orientation-lock=false
+
+[org/gnome/desktop/interface]
+enable-animations=true
+color-scheme='prefer-dark'
+clock-show-date=true
+clock-show-weekday=true
+font-antialiasing='rgba'
+font-hinting='slight'
+show-battery-percentage=true
+
+[org/gnome/settings-daemon/plugins/color]
+night-light-enabled=true
+night-light-schedule-automatic=true
+
+[org/gnome/settings-daemon/plugins/power]
+sleep-inactive-ac-type='suspend'
+sleep-inactive-battery-type='suspend'
+sleep-inactive-ac-timeout=900
+sleep-inactive-battery-timeout=600
+power-button-action='interactive'
+ambient-enabled=true
