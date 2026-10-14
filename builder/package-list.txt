@@ -1,10 +1,24 @@
 # Fedora AArch64 Minimal Package Set for Surface Pro 11 (LCD)
 # Base Core
-@core
+basesystem
+bash
+coreutils
+findutils
+grep
+sed
+gawk
+procps-ng
+dnf
+rpm
 systemd
 systemd-udev
-systemd-boot
+systemd-boot-unsigned
+grub2-efi-aa64
+grub2-efi-aa64-modules
+grub2-tools
+grub2-tools-extra
 dracut
+dracut-live
 efibootmgr
 util-linux
 tar
@@ -12,7 +26,6 @@ gzip
 xz
 zstd
 sudo
-passwd
 shadow-utils
 
 # Networking & Wireless
@@ -30,7 +43,7 @@ pipewire-pulseaudio
 pipewire-alsa
 wireplumber
 alsa-utils
-alsa-ucm-conf
+alsa-ucm
 
 # Display & Graphics (Mesa Adreno / Freedreno / Turnip)
 mesa-dri-drivers
@@ -47,7 +60,7 @@ gnome-session-wayland-session
 ptyxis
 nautilus
 xdg-desktop-portal-gnome
-polkit-gnome
+polkit
 gnome-keyring
 
 # Sensors & Input

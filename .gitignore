@@ -2,5 +2,6 @@ output/
 *.so*
 *.rpm
 !firmware/blobs/**
+firmware/blobs/qcom/x1e80100/microsoft/
 !dts/blobs/**
 !bin/iptsd
