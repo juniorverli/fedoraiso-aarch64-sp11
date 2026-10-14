@@ -90,6 +90,13 @@ cp -v /workspace/rpm/sources/sp11-mac-fixup/sp11-mac.conf /workspace/output/root
 cp -v /workspace/rpm/sources/sp11-mac-fixup/90-sp11-mac.rules /workspace/output/rootfs/etc/udev/rules.d/
 cp -v /workspace/rpm/sources/sp11-mac-fixup/sp11-bt-mac@.service /workspace/output/rootfs/etc/systemd/system/
 
+# Sprint 4: Libinput quirks & Touchscreen/Stylus (iptsd)
+mkdir -p /workspace/output/rootfs/etc/libinput/
+cp -v /workspace/configs/libinput/99-surface-sp11.quirks /workspace/output/rootfs/etc/libinput/
+mkdir -p /workspace/output/rootfs/etc/iptsd/ /workspace/output/rootfs/usr/share/iptsd/presets/
+cp -v /workspace/configs/iptsd/surface-pro-11.conf /workspace/output/rootfs/etc/iptsd/iptsd.conf
+cp -v /workspace/configs/iptsd/surface-pro-11.conf /workspace/output/rootfs/usr/share/iptsd/presets/
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf

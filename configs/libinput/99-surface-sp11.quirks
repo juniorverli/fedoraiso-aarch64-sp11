@@ -1,0 +1,12 @@
+# Libinput quirks for Microsoft Surface Pro 11 Type Cover / Flex Keyboard Touchpad
+[Microsoft Surface Pro 11 Touchpad]
+MatchName=*Surface*Touchpad*|*Surface*Type Cover*|*Surface*Flex*
+MatchUdevType=touchpad
+AttrPalmPressureThreshold=130
+AttrPressureRange=10:8
+ModelTouchpadPressureThresholds=1
+AttrThumbPressureThreshold=140
+
+[Microsoft Surface Pro 11 Tablet Switch]
+MatchName=*Surface*Tablet*Switch*
+AttrTabletModeSwitch=1
