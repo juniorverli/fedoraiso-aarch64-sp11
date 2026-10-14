@@ -1,0 +1,5 @@
+# Udev rule to trigger iptsd instance for Microsoft Surface Touch G6 digitizer
+SUBSYSTEM=="hidraw", ACTION=="add", TAG+="systemd", \
+	PROGRAM="/usr/bin/iptsd-check-device --quiet $env{DEVNAME}", \
+	PROGRAM="/bin/systemd-escape --path $env{DEVNAME}", \
+	ENV{SYSTEMD_WANTS}+="iptsd@$result.service"

@@ -2,7 +2,7 @@
 ### Qualcomm Snapdragon X Plus (`X1P64100` / Purwa 10-core Oryon CPU)
 **Desktop Environment:** Minimal GNOME on Pure Wayland (Zero Bloatware)
 
-Developed strictly under the **BMAD (Breakthrough Method of Agile AI-Driven Development)** methodology, porting and completing the implementation from `dwhinham/archiso-aarch64-sp11`, upstream `linux-surface` / `linux-msm`, and reverse engineering closed-source hardware blocks directly from the Surface Pro 11 Windows 11 ARM64 subsystem.
+Porting implementation from `dwhinham/archiso-aarch64-sp11`, upstream `linux-surface` / `linux-msm`, and hardware parameter reverse engineering from the Surface Pro 11 Windows 11 ARM64 subsystem.
 
 ---
 
@@ -20,76 +20,78 @@ Developed strictly under the **BMAD (Breakthrough Method of Agile AI-Driven Deve
 
 ---
 
-## 2. Completed BMAD Sprints Roadmap
+## 2. Real Implementation & Validation Status Matrix
 
-| Sprint | Subsystem & Focus | Key Deliverables & Git Commit | Status |
-|--------|-------------------|-------------------------------|:------:|
-| **Sprint 1** | Repo Audit & Image Pipeline | `ARCHISO_SP11_AUDIT.md`, `x1p64100-microsoft-denali.dts`, `dracut/sp11.conf`, Fedora 41 container builder (`8f726f8`) | **DONE** |
-| **Sprint 2** | Kernel RPM, USB4 & S2Idle | `kernel-sp11.spec`, `boot/loader/`, `configs/modprobe.d/sp11-usb4.conf`, `power/95-sp11-power.rules` (`e8c6e9e`) | **DONE** |
-| **Sprint 3** | Firmware & Wi-Fi 7 / BT 5.4 | `ath12k-bdencoder` board extraction, `output/firmware/ath12k/.../board.bin`, `sp11-mac-fixup` service (`adcb7bf`) | **DONE** |
-| **Sprint 4** | Type Cover & Touch / Stylus | `configs/iptsd/surface-pro-11.conf`, `iptsd.spec`, `99-surface-sp11.quirks` for Precision Touchpad (`2e71dde`) | **DONE** |
-| **Sprint 5** | GNOME Minimal on Wayland | `10-surface-wayland.conf`, `00-surface-sp11` dconf profile, 120Hz `monitors.xml` template (`04ccaef`) | **DONE** |
-| **Sprint 6** | AudioReach & Dual Studio Mics | `X1E80100-Microsoft-Surface-Pro-11-tplg.bin`, `MICROSOFT-Surface-Pro-11.conf`, PipeWire studio mic filter chain (`e40d2e2`) | **DONE** |
-| **Sprint 7** | Sensor Hub, Rotation & NPU | Qualcomm `sensor_pd`/`audio_pd`/`cdsp` JSNs, `61-surface-sp11-sensor.hwdb`, `99-fastrpc.rules` (`4f8bc9b`) | **DONE** |
-| **Sprint 8** | CAMSS Cameras, IR & LEDs | `dts/camera-sp11.dtsi` (IMX681/OV13858/VD55G0), `configs/libcamera/qcom-camss.yaml`, privacy LED rules (`90b9dbe`) | **DONE** |
+| Subsystem | Status de Implementação | Nível de Validação | Evidência / Artefatos Produzidos | Limitações Upstream / Próximos Passos |
+|:---|:---:|:---:|:---|:---|
+| **1. Compute e Energia** | **Configurado / Empacotado** | Estático / Configurado | • `rpm/specs/kernel-sp11.spec` com regras ativas de compilação<br>• `power/sp11-power.conf`<br>• `power/95-sp11-power.rules` (s2idle) | Suspensão/retomada s2idle e `power_profile` dependem do boot em bare-metal com o kernel compilado. |
+| **2. Display LCD** | **Compilado / Gerado** | Compilado | • `dts/blobs/x1p64100-microsoft-denali.dtb` (205 KB, compilado com `dtc`)<br>• PWM backlight via PMK8550 e PMC8380 GPIO 4/10 | Controle de backlight em painel LCD precisa de teste físico; OLED usa controle DPCD. |
+| **3. Gráficos & Vídeo** | **Configurado** | Configurado | • `configs/environment.d/10-surface-wayland.conf`<br>• Shaders Zap extraídos (`qcdxkmsuc8380.mbn`)<br>• `configs/gnome/00-surface-sp11` | Aceleração 3D Freedreno e Vulkan Turnip requerem execução ativa do servidor Wayland. |
+| **4. Teclado Type Cover** | **Configurado** | Configurado | • `dracut/sp11.conf` com drivers `surface_sam`, `surface_hid`, `surface_kbd`<br>• `configs/libinput/99-surface-sp11.quirks`<br>• Postura `SW_TABLET_MODE` | Funcionalidade docked mapeada via UART; modo sem fio Bluetooth do Flex Keyboard requer pareamento dedicado. |
+| **5. Toque e Caneta** | **Compilado / Empacotado** | Compilado | • Daemon `bin/iptsd` compilado nativamente (834 KB)<br>• `configs/iptsd/surface-pro-11.conf` (dimensões 287.6x191.7 mm)<br>• `configs/iptsd/iptsd@.service` & `50-iptsd.rules` | Necessita de teste de latência e inking com Surface Slim Pen 2 no hardware físico. |
+| **6. Wi-Fi e Bluetooth** | **Compilado / Configurado** | Extraído / Configurado | • `firmware/blobs/ath12k/WCN7850/hw2.0/board.bin` (88.872 bytes gerado via `ath12k-bdencoder`)<br>• `rpm/sources/sp11-mac-fixup/sp11-mac.conf` com MACs físicos (`e8:a7:2f:79:a5:c3/c4`) | Requer boot com driver `ath12k` e `btqca` para validar throughput Wi-Fi 7 e pareamento BLE. |
+| **7. Portas e Carga** | **Configurado** | Configurado | • `configs/modprobe.d/sp11-usb4.conf`<br>• Configuração GLINK e PS8830 retimers | Limitação upstream: saída externa de display em dock USB4/Surface Dock 2 ainda não opera em X1. |
+| **8. Áudio & Microfones** | **Compilado / Configurado** | Compilado | • `firmware/blobs/qcom/x1e80100/X1E80100-Microsoft-Surface-Pro-11-tplg.bin` (23 KB compilado com `alsatplg`)<br>• UCM2 HiFi profiles<br>• PipeWire filter-chain | Volume do alto-falante permanece conservador para proteção acústica enquanto o DSP de proteção não for validado. |
+| **9. Sensores e NPU** | **Configurado / Extraído** | Extraído / Configurado | • JSONs de domínio Qualcomm (`adsps.jsn`, `cdspr.jsn`, `battmgr.jsn`) em `configs/qcom/`<br>• `configs/udev/61-surface-sp11-sensor.hwdb`<br>• `configs/udev/99-fastrpc.rules` | Rotação automática e inferência via FastRPC `/dev/fastrpc-cdsp` requerem teste em sessão ativa. |
+| **10. Câmeras, IR e LEDs** | **Pesquisa / Parcial** | Engenharia Reversa | • `dts/camera-sp11.dtsi` mapeando IMX681, OV13858 e VD55G0<br>• `configs/libcamera/qcom-camss.yaml`<br>• `scripts/surface-privacy-led.sh` (via SAM) | **Limitação Upstream:** Sem driver CAMSS Spectra 695 funcional no kernel upstream. Câmeras não transmitem vídeo atualmente. |
 
 ---
 
-## 3. Directory Layout
+## 3. Estrutura do Repositório
+
 ```text
 surface/
-├── audit/
-│   └── ARCHISO_SP11_AUDIT.md        # Complete analysis of archiso-aarch64-sp11 and translation path
+├── bin/
+│   └── iptsd                         # Binário compilado do daemon IPTSD (AArch64)
 ├── boot/
 │   └── loader/
-│       ├── loader.conf              # Systemd-boot default config
-│       └── entries/fedora-sp11.conf # SP11 LCD boot entry with clk/pd/pauth/tpm2 cmdline flags
+│       ├── loader.conf               # Configuração padrão do systemd-boot
+│       └── entries/fedora-sp11.conf  # Entrada de boot com parâmetros clk/pd/pauth/tpm2
 ├── builder/
-│   ├── build-fedora-image.sh        # Reproducible Fedora AArch64 containerized image generator
-│   └── package-list.txt             # Minimal GNOME Wayland package list (zero bloat)
+│   ├── build-fedora-image.sh         # Pipeline de build automatizado do RootFS e imagem .raw
+│   └── package-list.txt              # Lista enxuta de pacotes Fedora GNOME Wayland
 ├── configs/
-│   ├── alsa/ucm2/                   # ALSA UCM2 profiles for Surface Pro 11 stereo speakers & studio mics
-│   ├── environment.d/               # Wayland environment variables (Mesa Freedreno/Turnip tuning)
-│   ├── gnome/                       # Dconf system profile and 2880x1920 @ 120Hz monitors.xml
-│   ├── iptsd/                       # Touchscreen & Slim Pen 2 hardware preset (MSHW0484)
-│   ├── libcamera/                   # Libcamera pipeline config for Spectra 695 CAMSS
-│   ├── libinput/                    # Precision Touchpad and Tablet mode switch quirks
-│   ├── modprobe.d/                  # USB4 / Type-C DisplayPort Alt-Mode retimer options
-│   ├── pipewire/                    # AudioReach latency & Studio Mic echo-cancellation filter chain
-│   ├── qcom/                        # Qualcomm Service Registry domain JSONs (sensor_pd, audio_pd, cdsp)
-│   └── udev/                        # Accelerometer mount matrix, FastRPC NPU permissions & privacy LEDs
+│   ├── alsa/ucm2/                    # Perfis ALSA UCM2 para Surface Pro 11
+│   ├── environment.d/                # Variáveis de ambiente Wayland / Mesa Freedreno
+│   ├── gnome/                        # Perfil Dconf e modelo monitors.xml (120 Hz)
+│   ├── iptsd/                        # Preset de hardware, serviço systemd e regras udev
+│   ├── libcamera/                    # Mapeamento conceitual libcamera para Spectra 695
+│   ├── libinput/                     # Quirks de rejeição de palma do Touchpad e tablet mode
+│   ├── modprobe.d/                   # Opções de retimers USB4 / DP Alt-Mode
+│   ├── pipewire/                     # Latência AudioReach e cancelamento de eco para Studio Mics
+│   ├── qcom/                         # JSONs de registro de serviços Qualcomm (sensor_pd, cdsp, audio)
+│   └── udev/                         # Matriz de montagem de acelerômetro e permissões FastRPC
 ├── dracut/
-│   └── sp11.conf                    # Early KMS, display, NVMe and Surface SAM initramfs modules
+│   └── sp11.conf                     # Módulos initramfs (KMS, eDP, NVMe, SAM)
 ├── dts/
-│   ├── camera-sp11.dtsi             # CAMSS CSI-2 sensor subnodes (IMX681, OV13858, VD55G0)
-│   ├── x1-microsoft-denali.dtsi     # Core Denali base device tree
-│   └── x1p64100-microsoft-denali.dts# LCD variant device tree with PMIC PWM backlight
+│   ├── blobs/
+│   │   └── x1p64100-microsoft-denali.dtb # DTB compilado via dtc (205 KB)
+│   ├── camera-sp11.dtsi              # Overlay de pesquisa das câmeras (IMX681, OV13858, VD55G0)
+│   ├── x1-microsoft-denali.dtsi      # DTS base do Surface Pro 11
+│   └── x1p64100-microsoft-denali.dts # DTS da variante LCD com backlight PWM
 ├── firmware/
-│   ├── ath12k-bdencoder             # Qualcomm board extraction utility
-│   └── extract-firmware.sh          # Automated DriverStore firmware extractor
-├── output/
-│   └── firmware/                    # Extracted and compiled binaries:
-│       ├── ath12k/WCN7850/hw2.0/board.bin
-│       └── qcom/x1e80100/X1E80100-Microsoft-Surface-Pro-11-tplg.bin
+│   ├── ath12k-bdencoder              # Utilitário Qualcomm para extração de calibração Wi-Fi
+│   ├── blobs/                        # Calibração e topologia compiladas:
+│   │   ├── ath12k/WCN7850/hw2.0/board.bin
+│   │   └── qcom/x1e80100/X1E80100-Microsoft-Surface-Pro-11-tplg.bin
+│   └── extract-firmware.sh           # Extrator de firmwares do DriverStore
 ├── power/
-│   ├── 95-sp11-power.rules          # S2Idle enforcement & SAM platform profile permissions
-│   └── sp11-power.conf              # Systemd logind tablet suspend rules
-└── rpm/
-    ├── sources/sp11-mac-fixup/      # Factory MAC address fixup service & udev rules
-    └── specs/                       # RPM spec files for kernel-sp11, iptsd, ath12k-board, mac-fixup
+│   ├── 95-sp11-power.rules           # Forçamento de s2idle e permissões de perfil SAM
+│   └── sp11-power.conf               # Configurações de suspensão no systemd-logind
+├── rpm/
+│   ├── sources/sp11-mac-fixup/       # Serviço e regras de fixação dos MACs físicos de fábrica
+│   └── specs/                        # Specs RPM (kernel-sp11, iptsd, ath12k-board, mac-fixup)
+└── scripts/
+    └── surface-privacy-led.sh        # Controle do LED de privacidade via SAM
 ```
 
 ---
 
-## 4. Building the Fedora Image
+## 4. Instruções de Execução
 
-Run the builder script from the repository root:
+Para compilar o rootfs completo do Fedora e gerar a imagem particionada `.raw`:
 ```bash
+cd /home/juniormverli/repositories/surface
 ./builder/build-fedora-image.sh
 ```
-This executes within a native `fedora:41` container on AArch64:
-1. Extracts proprietary firmware from the local Windows `DriverStore` (or mirror).
-2. Generates the `ath12k` calibration `board.bin` using `ath12k-bdencoder`.
-3. Stages the AudioReach topology binary `X1E80100-Microsoft-Surface-Pro-11-tplg.bin`.
-4. Bootstraps the minimal Fedora AArch64 package set.
-5. Deploys the Dracut early-boot initramfs configuration, systemd-boot entries, ALSA UCM, PipeWire filter chains, sensor mount matrices, and pure Wayland GNOME session.
+O script usará o container Docker `fedora:41`, compilará os binários pendentes, montará a árvore de arquivos, formatará as partições GPT (ESP + RootFS) e produzirá `output/fedora-surface-pro-11-lcd.raw`.

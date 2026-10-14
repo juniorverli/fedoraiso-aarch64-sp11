@@ -6,20 +6,28 @@
 set -euo pipefail
 
 DEST_ROOT="${1:-/usr/lib/firmware}"
-LOCAL_DRIVERSTORE="/mnt/c/Windows/System32/DriverStore/FileRepository"
+
+LOCAL_DRIVERSTORE=""
+for ds in "${DRIVERSTORE_DIR:-}" "/mnt/driverstore" "/mnt/c/Windows/System32/DriverStore/FileRepository"; do
+    if [ -n "$ds" ] && [ -d "$ds" ]; then
+        LOCAL_DRIVERSTORE="$ds"
+        break
+    fi
+done
 
 echo "=========================================================="
 echo " Surface Pro 11 (X1P LCD) Firmware Extractor Pipeline"
 echo " Target destination: ${DEST_ROOT}"
+echo " DriverStore path:   ${LOCAL_DRIVERSTORE:-[NOT FOUND]}"
 echo "=========================================================="
 
 mkdir -p "${DEST_ROOT}/qcom/x1e80100/microsoft/Denali"
 mkdir -p "${DEST_ROOT}/ath12k/WCN7850/hw2.0"
 mkdir -p "${DEST_ROOT}/qcom/sensors"
 
-if [ -d "${LOCAL_DRIVERSTORE}" ]; then
-    echo "[*] Local Windows DriverStore detected at ${LOCAL_DRIVERSTORE}"
-    echo "[*] Extracting directly from host Windows installation..."
+if [ -n "${LOCAL_DRIVERSTORE}" ]; then
+    echo "[*] Windows DriverStore located at ${LOCAL_DRIVERSTORE}"
+    echo "[*] Extracting firmware components..."
 
     # 1. ADSP Firmware & Topology DTB
     echo "[+] Extracting ADSP firmware & device tree..."
@@ -43,7 +51,6 @@ if [ -d "${LOCAL_DRIVERSTORE}" ]; then
     echo "[+] Extracting Adreno X1 GPU microcode..."
     GPU_DIR=$(find "${LOCAL_DRIVERSTORE}" -maxdepth 1 -type d -name "qcdx8380*" | head -n 1)
     if [ -n "${GPU_DIR}" ]; then
-        # Install both standard and purwa (X1P) microcode
         cp -v "${GPU_DIR}/qcdxkmsuc8380.mbn" "${DEST_ROOT}/qcom/x1e80100/microsoft/qcdxkmsuc8380.mbn" || true
         [ -f "${GPU_DIR}/qcdxkmsucpurwa.mbn" ] && cp -v "${GPU_DIR}/qcdxkmsucpurwa.mbn" "${DEST_ROOT}/qcom/x1e80100/microsoft/Denali/qcdxkmsuc8380.mbn"
         cp -v "${GPU_DIR}/qcvss8380.mbn" "${DEST_ROOT}/qcom/x1e80100/microsoft/Denali/qcvss8380.mbn"
@@ -91,7 +98,7 @@ if [ -d "${LOCAL_DRIVERSTORE}" ]; then
         rm -rf "${TMP_DIR}"
     fi
 
-    echo "[✓] Firmware extraction from local DriverStore completed successfully!"
+    echo "[✓] Firmware extraction completed successfully!"
 else
-    echo "[!] Local DriverStore not found. Online fallback retrieval would be triggered."
+    echo "[!] DriverStore not found in search paths."
 fi

@@ -1,6 +1,6 @@
 output/
-*.bin
-*.elf
-*.mbn
 *.so*
 *.rpm
+!firmware/blobs/**
+!dts/blobs/**
+!bin/iptsd

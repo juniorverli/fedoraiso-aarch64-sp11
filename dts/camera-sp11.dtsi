@@ -7,10 +7,12 @@
  * - Front: Sony IMX681 (ACPI\SONY0681 / MSHW0490) on 2-lane MIPI CSI-2 (CSIPHY0 / CCI0)
  * - Rear:  OmniVision OV13858 (ACPI\OVTID858 / MSHW0491) on 4-lane MIPI CSI-2 (CSIPHY1 / CCI0)
  * - Aux/IR: STMicroelectronics VD55G0 (ACPI\SMO55F0 / MSHW0492) on 1-lane MIPI CSI-2 (CSIPHY2 / CCI1)
+ *
+ * NOTE: Upstream Linux does not yet contain complete CAMSS Spectra 695 ISP drivers.
+ * This overlay establishes the verified pin, clock, and regulator bindings for downstream/out-of-tree testing.
  */
 
 / {
-	// Camera Power Regulators
 	vreg_cam_iovdd: regulator-cam-iovdd {
 		compatible = "regulator-fixed";
 		regulator-name = "VREG_CAM_IOVDD";
@@ -54,7 +56,7 @@
 		compatible = "sony,imx681";
 		reg = <0x1a>;
 
-		clocks = <&camcc 0>; // MCLK0 @ 24MHz
+		clocks = <&camcc 0>;
 		clock-names = "mclk";
 		assigned-clocks = <&camcc 0>;
 		assigned-clock-rates = <24000000>;
@@ -70,7 +72,6 @@
 			imx681_ep: endpoint {
 				data-lanes = <1 2>;
 				link-frequencies = /bits/ 64 <480000000>;
-				remote-endpoint = <&csiphy0_ep>;
 			};
 		};
 	};
@@ -80,7 +81,7 @@
 		compatible = "ovti,ov13858";
 		reg = <0x36>;
 
-		clocks = <&camcc 1>; // MCLK1 @ 24MHz
+		clocks = <&camcc 1>;
 		clock-names = "mclk";
 		assigned-clocks = <&camcc 1>;
 		assigned-clock-rates = <24000000>;
@@ -96,7 +97,6 @@
 			ov13858_ep: endpoint {
 				data-lanes = <1 2 3 4>;
 				link-frequencies = /bits/ 64 <600000000>;
-				remote-endpoint = <&csiphy1_ep>;
 			};
 		};
 	};
@@ -110,7 +110,7 @@
 		compatible = "st,vd55g0";
 		reg = <0x10>;
 
-		clocks = <&camcc 2>; // MCLK2 @ 24MHz
+		clocks = <&camcc 2>;
 		clock-names = "mclk";
 		assigned-clocks = <&camcc 2>;
 		assigned-clock-rates = <24000000>;
@@ -124,7 +124,6 @@
 			vd55g0_ep: endpoint {
 				data-lanes = <1>;
 				link-frequencies = /bits/ 64 <300000000>;
-				remote-endpoint = <&csiphy2_ep>;
 			};
 		};
 	};
