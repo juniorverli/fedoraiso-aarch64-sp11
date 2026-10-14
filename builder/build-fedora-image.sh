@@ -111,6 +111,12 @@ mkdir -p /workspace/output/rootfs/var/lib/gdm/.config/ /workspace/output/rootfs/
 cp -v /workspace/configs/gnome/monitors.xml /workspace/output/rootfs/var/lib/gdm/.config/monitors.xml
 cp -v /workspace/configs/gnome/monitors.xml /workspace/output/rootfs/etc/skel/.config/monitors.xml
 
+# Sprint 6: AudioReach ALSA UCM & PipeWire Studio Mics
+mkdir -p /workspace/output/rootfs/usr/share/alsa/ucm2/Qualcomm/x1e80100/
+cp -v /workspace/configs/alsa/ucm2/Qualcomm/x1e80100/*.conf /workspace/output/rootfs/usr/share/alsa/ucm2/Qualcomm/x1e80100/ || true
+mkdir -p /workspace/output/rootfs/etc/pipewire/pipewire.conf.d/
+cp -v /workspace/configs/pipewire/pipewire.conf.d/10-surface-sp11-audio.conf /workspace/output/rootfs/etc/pipewire/pipewire.conf.d/
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf
