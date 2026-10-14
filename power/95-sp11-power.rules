@@ -1,0 +1,15 @@
+# Udev rules for Microsoft Surface Pro 11 Power Management
+# Force s2idle (deep sleep for Qualcomm Oryon/RPMh)
+ACTION=="add", SUBSYSTEM=="power", ATTR{mem_sleep}="s2idle"
+
+# Surface Aggregator Module Platform Profile permissions
+ACTION=="add", SUBSYSTEM=="platform_profile", KERNEL=="platform_profile", \
+    RUN+="/bin/sh -c 'chmod 0664 /sys/firmware/acpi/platform_profile 2>/dev/null || true'"
+
+# Surface Battery and Charger event triggers for GNOME UPower
+SUBSYSTEM=="power_supply", ATTR{type}=="Battery", ATTR{present}=="1", \
+    ENV{POWER_SUPPLY_PROP}="capacity status"
+
+# FastConnect PCIe power management (prevent unwanted wakeups during s2idle)
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x17cb", ATTR{device}=="0x1107", \
+    ATTR{power/wakeup}="disabled"

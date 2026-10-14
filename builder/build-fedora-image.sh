@@ -66,6 +66,21 @@ cp -v /workspace/dracut/sp11.conf /workspace/output/rootfs/etc/dracut.conf.d/
 mkdir -p /workspace/output/rootfs/usr/lib/firmware/
 cp -rv /workspace/output/firmware/* /workspace/output/rootfs/usr/lib/firmware/
 
+# Power and S2Idle configuration
+mkdir -p /workspace/output/rootfs/etc/systemd/logind.conf.d/
+cp -v /workspace/power/sp11-power.conf /workspace/output/rootfs/etc/systemd/logind.conf.d/
+mkdir -p /workspace/output/rootfs/etc/udev/rules.d/
+cp -v /workspace/power/95-sp11-power.rules /workspace/output/rootfs/etc/udev/rules.d/
+
+# Modprobe configs
+mkdir -p /workspace/output/rootfs/etc/modprobe.d/
+cp -v /workspace/configs/modprobe.d/sp11-usb4.conf /workspace/output/rootfs/etc/modprobe.d/
+
+# Bootloader (systemd-boot) configuration
+mkdir -p /workspace/output/rootfs/boot/loader/entries/
+cp -v /workspace/boot/loader/loader.conf /workspace/output/rootfs/boot/loader/
+cp -v /workspace/boot/loader/entries/fedora-sp11.conf /workspace/output/rootfs/boot/loader/entries/
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf
