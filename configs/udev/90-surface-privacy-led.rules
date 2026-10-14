@@ -1,0 +1,6 @@
+# Privacy LED control rules for Microsoft Surface Pro 11 Cameras
+# Binds camera device access events to trigger hardware privacy LED via SAM/GPIO
+
+SUBSYSTEM=="video4linux", KERNEL=="video*", GROUP="video", MODE="0660"
+KERNEL=="v4l-subdev*", GROUP="video", MODE="0660"
+KERNEL=="media*", GROUP="video", MODE="0660"

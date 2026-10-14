@@ -126,6 +126,12 @@ chroot /workspace/output/rootfs systemd-hwdb update || true
 cp -v /workspace/configs/udev/99-fastrpc.rules /workspace/output/rootfs/etc/udev/rules.d/
 chroot /workspace/output/rootfs systemctl enable iio-sensor-proxy.service || true
 
+# Sprint 8: Cameras & Privacy LEDs (Qualcomm CAMSS & libcamera)
+mkdir -p /workspace/output/rootfs/etc/libcamera/ /workspace/output/rootfs/usr/share/libcamera/pipeline/qcom-camss/
+cp -v /workspace/configs/libcamera/qcom-camss.yaml /workspace/output/rootfs/etc/libcamera/
+cp -v /workspace/configs/libcamera/qcom-camss.yaml /workspace/output/rootfs/usr/share/libcamera/pipeline/qcom-camss/ || true
+cp -v /workspace/configs/udev/90-surface-privacy-led.rules /workspace/output/rootfs/etc/udev/rules.d/
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf

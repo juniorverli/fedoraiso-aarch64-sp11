@@ -1,0 +1,131 @@
+// SPDX-License-Identifier: BSD-3-Clause
+/*
+ * Qualcomm Spectra 695 CAMSS Camera Subsystem & Sensor Definitions
+ * for Microsoft Surface Pro 11 (Denali)
+ *
+ * Reverse engineered from Windows DriverStore:
+ * - Front: Sony IMX681 (ACPI\SONY0681 / MSHW0490) on 2-lane MIPI CSI-2 (CSIPHY0 / CCI0)
+ * - Rear:  OmniVision OV13858 (ACPI\OVTID858 / MSHW0491) on 4-lane MIPI CSI-2 (CSIPHY1 / CCI0)
+ * - Aux/IR: STMicroelectronics VD55G0 (ACPI\SMO55F0 / MSHW0492) on 1-lane MIPI CSI-2 (CSIPHY2 / CCI1)
+ */
+
+/ {
+	// Camera Power Regulators
+	vreg_cam_iovdd: regulator-cam-iovdd {
+		compatible = "regulator-fixed";
+		regulator-name = "VREG_CAM_IOVDD";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+	};
+
+	vreg_cam_avdd_rear: regulator-cam-avdd-rear {
+		compatible = "regulator-fixed";
+		regulator-name = "VREG_CAM_AVDD_REAR";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		enable-active-high;
+		gpio = <&pmc8380_3_gpios 8 GPIO_ACTIVE_HIGH>;
+	};
+
+	vreg_cam_avdd_front: regulator-cam-avdd-front {
+		compatible = "regulator-fixed";
+		regulator-name = "VREG_CAM_AVDD_FRONT";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		enable-active-high;
+		gpio = <&pmc8380_3_gpios 9 GPIO_ACTIVE_HIGH>;
+	};
+
+	vreg_cam_dvdd: regulator-cam-dvdd {
+		compatible = "regulator-fixed";
+		regulator-name = "VREG_CAM_DVDD";
+		regulator-min-microvolt = <1200000>;
+		regulator-max-microvolt = <1200000>;
+		regulator-always-on;
+	};
+};
+
+&cci0 {
+	status = "okay";
+
+	// Front RGB Camera: Sony IMX681
+	camera_front: camera@1a {
+		compatible = "sony,imx681";
+		reg = <0x1a>;
+
+		clocks = <&camcc 0>; // MCLK0 @ 24MHz
+		clock-names = "mclk";
+		assigned-clocks = <&camcc 0>;
+		assigned-clock-rates = <24000000>;
+
+		reset-gpios = <&tlmm 110 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+
+		iovdd-supply = <&vreg_cam_iovdd>;
+		avdd-supply = <&vreg_cam_avdd_front>;
+		dvdd-supply = <&vreg_cam_dvdd>;
+
+		port {
+			imx681_ep: endpoint {
+				data-lanes = <1 2>;
+				link-frequencies = /bits/ 64 <480000000>;
+				remote-endpoint = <&csiphy0_ep>;
+			};
+		};
+	};
+
+	// Rear AF Camera: OmniVision OV13858
+	camera_rear: camera@36 {
+		compatible = "ovti,ov13858";
+		reg = <0x36>;
+
+		clocks = <&camcc 1>; // MCLK1 @ 24MHz
+		clock-names = "mclk";
+		assigned-clocks = <&camcc 1>;
+		assigned-clock-rates = <24000000>;
+
+		reset-gpios = <&tlmm 111 GPIO_ACTIVE_LOW>;
+		pinctrl-names = "default";
+
+		iovdd-supply = <&vreg_cam_iovdd>;
+		avdd-supply = <&vreg_cam_avdd_rear>;
+		dvdd-supply = <&vreg_cam_dvdd>;
+
+		port {
+			ov13858_ep: endpoint {
+				data-lanes = <1 2 3 4>;
+				link-frequencies = /bits/ 64 <600000000>;
+				remote-endpoint = <&csiphy1_ep>;
+			};
+		};
+	};
+};
+
+&cci1 {
+	status = "okay";
+
+	// Windows Hello Front IR Camera: STMicroelectronics VD55G0
+	camera_ir: camera@10 {
+		compatible = "st,vd55g0";
+		reg = <0x10>;
+
+		clocks = <&camcc 2>; // MCLK2 @ 24MHz
+		clock-names = "mclk";
+		assigned-clocks = <&camcc 2>;
+		assigned-clock-rates = <24000000>;
+
+		reset-gpios = <&tlmm 112 GPIO_ACTIVE_LOW>;
+
+		iovdd-supply = <&vreg_cam_iovdd>;
+		avdd-supply = <&vreg_cam_avdd_front>;
+
+		port {
+			vd55g0_ep: endpoint {
+				data-lanes = <1>;
+				link-frequencies = /bits/ 64 <300000000>;
+				remote-endpoint = <&csiphy2_ep>;
+			};
+		};
+	};
+};

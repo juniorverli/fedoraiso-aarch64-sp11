@@ -1,0 +1,33 @@
+# Libcamera configuration for Qualcomm Spectra CAMSS on Microsoft Surface Pro 11
+version: 1
+cameras:
+  - id: "imx681"
+    location: "front"
+    rotation: 0
+    model: "Sony IMX681"
+    formats:
+      - pixel_format: "YUYV"
+        sizes:
+          - 2560x1440
+          - 1920x1080
+          - 1280x720
+
+  - id: "ov13858"
+    location: "back"
+    rotation: 180
+    model: "OmniVision OV13858"
+    formats:
+      - pixel_format: "YUYV"
+        sizes:
+          - 3840x2160
+          - 1920x1080
+
+  - id: "vd55g0"
+    location: "front"
+    rotation: 0
+    model: "STMicroelectronics VD55G0 (NIR Windows Hello)"
+    formats:
+      - pixel_format: "GREY"
+        sizes:
+          - 1280x720
+          - 640x480
