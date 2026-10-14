@@ -56,6 +56,41 @@ if [ -d "${LOCAL_DRIVERSTORE}" ]; then
         cp -v "${SPI_DIR}/BSRC_QSPI_DEN.bin" "${DEST_ROOT}/qcom/x1e80100/microsoft/Denali/"
     fi
 
+    # 5. ath12k Wi-Fi 7 Calibration Board File
+    echo "[+] Extracting ath12k WCN7850 calibration board file..."
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    BDENCODER="${SCRIPT_DIR}/ath12k-bdencoder"
+    BOARD2_SRC=""
+    for candidate in /usr/lib/firmware/ath12k/WCN7850/hw2.0/board-2.bin.xz \
+                     /usr/lib/firmware/ath12k/WCN7850/hw2.0/board-2.bin \
+                     /lib/firmware/ath12k/WCN7850/hw2.0/board-2.bin.xz \
+                     /lib/firmware/ath12k/WCN7850/hw2.0/board-2.bin; do
+        if [ -f "$candidate" ]; then
+            BOARD2_SRC="$candidate"
+            break
+        fi
+    done
+
+    if [ -n "$BOARD2_SRC" ] && [ -x "$BDENCODER" ]; then
+        TMP_DIR=$(mktemp -d)
+        if [[ "$BOARD2_SRC" == *.xz ]]; then
+            xz -dc "$BOARD2_SRC" > "${TMP_DIR}/board-2.bin"
+        else
+            cp "$BOARD2_SRC" "${TMP_DIR}/board-2.bin"
+        fi
+        (
+            cd "${TMP_DIR}"
+            python3 "$BDENCODER" --extract board-2.bin >/dev/null 2>&1 || true
+            TARGET='bus=pci,vendor=17cb,device=1107,subsystem-vendor=17cb,subsystem-device=3378,qmi-chip-id=2,qmi-board-id=255.bin'
+            if [ -f "$TARGET" ]; then
+                mkdir -p "${DEST_ROOT}/ath12k/WCN7850/hw2.0"
+                cp -v "$TARGET" "${DEST_ROOT}/ath12k/WCN7850/hw2.0/board.bin"
+                echo "[✓] ath12k board.bin generated successfully!"
+            fi
+        )
+        rm -rf "${TMP_DIR}"
+    fi
+
     echo "[✓] Firmware extraction from local DriverStore completed successfully!"
 else
     echo "[!] Local DriverStore not found. Online fallback retrieval would be triggered."

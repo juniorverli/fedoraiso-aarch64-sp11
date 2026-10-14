@@ -56,7 +56,9 @@ libinput-utils
 iio-sensor-proxy
 
 # System Tools & Firmware
+atheros-firmware
+qcom-firmware
+qcom-accel-firmware
 linux-firmware
-linux-firmware-qcom
 pciutils
 usbutils

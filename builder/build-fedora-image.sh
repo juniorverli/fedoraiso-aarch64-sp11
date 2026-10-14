@@ -81,6 +81,15 @@ mkdir -p /workspace/output/rootfs/boot/loader/entries/
 cp -v /workspace/boot/loader/loader.conf /workspace/output/rootfs/boot/loader/
 cp -v /workspace/boot/loader/entries/fedora-sp11.conf /workspace/output/rootfs/boot/loader/entries/
 
+# Wi-Fi 7 and Bluetooth MAC address fixup
+mkdir -p /workspace/output/rootfs/usr/bin/
+mkdir -p /workspace/output/rootfs/etc/systemd/system/
+cp -v /workspace/rpm/sources/sp11-mac-fixup/sp11-mac-fixup /workspace/output/rootfs/usr/bin/
+chmod 0755 /workspace/output/rootfs/usr/bin/sp11-mac-fixup
+cp -v /workspace/rpm/sources/sp11-mac-fixup/sp11-mac.conf /workspace/output/rootfs/etc/
+cp -v /workspace/rpm/sources/sp11-mac-fixup/90-sp11-mac.rules /workspace/output/rootfs/etc/udev/rules.d/
+cp -v /workspace/rpm/sources/sp11-mac-fixup/sp11-bt-mac@.service /workspace/output/rootfs/etc/systemd/system/
+
 # GDM pure Wayland configuration
 mkdir -p /workspace/output/rootfs/etc/gdm/
 cat << 'EOF_GDM' > /workspace/output/rootfs/etc/gdm/custom.conf
