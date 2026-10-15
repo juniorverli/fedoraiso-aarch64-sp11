@@ -126,7 +126,7 @@ if not (data.get('ID') == 'fedora' and data.get('VERSION_ID') == '44' and data.g
 if not list((root / 'usr/share/wayland-sessions').glob('*gnome*.desktop')) or not any((root / p).exists() for p in ('usr/bin/anaconda', 'usr/sbin/anaconda')):
     raise SystemExit('Official GNOME Wayland session or Anaconda is absent')
 PY
-KVER="${SURFACE_KERNEL_VERSION:-7.2.0-sp11-exp}"
+KVER="${SURFACE_KERNEL_VERSION:-7.2.8-arch1-3-sp11}"
 [[ -s $KERNEL_SOURCE/usr/lib/modules/$KVER/vmlinuz ]] || { echo "Missing source kernel: $KVER" >&2; exit 1; }
 KERNEL_VERSION="$KVER" bash "$WORKSPACE_DIR/builder/install-surface-support.sh" "$ROOTFS" "$KERNEL_SOURCE"
 install -Dm644 "$ROOTFS/usr/lib/modules/$KVER/vmlinuz" "$ROOTFS/boot/vmlinuz-sp11"
