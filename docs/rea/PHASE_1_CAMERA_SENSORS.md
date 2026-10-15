@@ -5,9 +5,18 @@ runs on the owner's Surface; this development workspace is WSL. Hardware capture
 and binding validation remain Fedora work. The static manifest
 `builder/surface-hardware.json` describes shipped modules and firmware, not proof
 of physical components. Legacy Portuguese notes are leads: their raw REA records
-are unavailable here, so their sensor names, IDs, register sequences, clocks,
-voltages and wiring remain unverified. IMX681, OV13858 and VD55G0 are candidate
-labels, not established identities. Do not enable `dts/camera-sp11.dtsi`.
+are unavailable here, so their register sequences, clocks, voltages and wiring
+remain unverified. IMX681, OV13858 and VD55G0 are package-supported candidate
+labels; chip identities have not been established by Linux sensor reads.
+Do not enable `dts/camera-sp11.dtsi`.
+
+Offline investigation has progressed to [decoded camera resource findings](CAMERA_RESOURCE_FINDINGS.md):
+six selected SCFG/resource files now have structural decoding with source hashes
+and byte offsets. Their GPIO/clock tuples contradict parts of the inactive DTS.
+Native Windows PnP now confirms the matching front/rear/IR subsystem IDs on this
+Surface host and active display/keyboard sensor-platform package. Vendor argument
+meanings and Linux resource mappings still need corroboration; ALS transport
+remains a Fedora live-enumeration question.
 
 REA MCP is not connected here. Local CLI investigation, when available, is
 recorded separately in [initial static findings](INITIAL_STATIC_FINDINGS.md);

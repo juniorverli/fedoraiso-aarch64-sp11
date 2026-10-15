@@ -55,6 +55,11 @@ Inference: the package includes code paths referring to FastRPC, a sensors prote
 
 The three MSHW0490/0491/0492 SCFG files and front CAMF resource file begin with bytes `41 65 6f 42` (ASCII `AeoB`), not an ACPI `DSDT`/`SSDT` table signature. Do not feed them to an AML disassembler on the assumption that the INF comment “Asl binary” establishes their format. A decoder for this container still needs to be identified.
 
+Follow-up: [resource decoding](CAMERA_RESOURCE_FINDINGS.md) now identifies the
+serialized Windows ACPI method-output layout and provides a tested structural
+decoder. The observation above records the initial triage stage; electrical
+semantics and live device correlation remain unresolved.
+
 | Resource | Bytes | SHA-256 |
 |---|---|---|
 | `SCFG_FRONT_MSHW0490.bin` | 133 | `e6e3d828a1e4f5bc94c545848a091c20be399a4b22c938ed4a3df072dd033d99` |
@@ -65,7 +70,7 @@ The three MSHW0490/0491/0492 SCFG files and front CAMF resource file begin with 
 ## Next analysis targets
 
 1. Collect Fedora inventory and match its DT/ACPI IDs to these package variants. DT boot may not enumerate the same ACPI devices as Windows.
-2. Hash the matching SCFG and CAM*_RES files and inspect their headers before selecting an ACPI/resource parser. Extract documented resources with offsets and cross-check DT; filenames alone do not reveal a register map.
+2. Use the [resource decoder and findings](CAMERA_RESOURCE_FINDINGS.md) to inspect matching SCFG and CAM*_RES files with offsets; correlate vendor tuples with their driver consumers and DT providers. Filenames and decoded values alone do not establish electrical semantics.
 3. Trace the platform/sensor driver functions using a configured Ghidra/Hopper provider to recover resource use and power sequencing. Header and string evidence is insufficient for driver implementation.
 4. Compare the live kernel revision, media graph and binding failures with a pinned upstream source revision. Do not infer global upstream support status from generic CAMSS module availability.
 
@@ -76,7 +81,7 @@ The current ISP hash differs from the shortened hash in the older strategy note.
 Source: the Windows volume mounted at `/mnt/c` in this WSL workspace; acquisition
 date 2026-10-15. The original driver installation date and correspondence between
 this Windows volume and the currently booted Fedora device are **unknown** until
-correlated with device evidence. Presence in DriverStore does not prove a package
+correlated with device evidence. Follow-up [Windows host correlation](CAMERA_RESOURCE_FINDINGS.md#windows-host-correlation) now confirms the selected camera IDs on this Windows host and the active sensor-platform INF; Fedora correlation remains pending. Presence in DriverStore does not prove a package
 is active. No device serial number is retained in this report.
 
 Observed INF `DriverVer` values (Windows date notation):
