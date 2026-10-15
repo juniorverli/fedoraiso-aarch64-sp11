@@ -9,7 +9,7 @@ locais não substituem validação no Fedora físico.
 
 | Fase | Entrega e critério de conclusão | Evidência atual | Situação |
 |---|---|---|---|
-| Câmeras / ISP / IR | Identificação, recursos, drivers e pipeline; captura reproduzível no Fedora e comportamento do indicador/iluminação | IDs Windows presentes, seis recursos decodificados com 595 nós; candidato externo de kernel/libcamera identificado | Investigação avançou; integração e teste físico pendentes |
+| Câmeras / ISP / IR | Identificação, recursos, drivers e pipeline; captura reproduzível no Fedora e comportamento do indicador/iluminação | 142 arquivos inventariados; oito módulos Chromatix decodificados; 1151 funções recuperadas via REA; kernel e libcamera/GStreamer candidatos compilados | Captura e aplicativos no Fedora físico ainda pendentes |
 | ALS | Transporte e driver identificados, leitura de luz e integração com sensor proxy verificadas | Plataforma de sensores Windows associada a qcSensors/FastRPC/QMI; transporte Linux ainda sem captura | Pendente de enumeração Fedora e análise do candidato de sensores |
 | Howdy | IR funcional antes de integrar autenticação; configuração com recuperação por senha e teste de login | Roteiro de pré-requisitos; nenhuma alteração PAM | Pendente do pipeline IR |
 | Áudio | Perfil/UCM e canais corretos, ausência de falhas; proteção DSP/VI/calibração do alto-falante demonstrada antes de ampliar ganho | Usuário relata speakers e microfone funcionando; fonte de proteção X1E auditada, ACDB REV_0D idêntico e topologia recompilada com hash publicado; port X1P ainda pendente | Diagnóstico e portabilidade em andamento; proteção não declarada implementada |
@@ -54,3 +54,7 @@ não completam sozinhos uma adaptação integral de Shell e aplicativos a Materi
 O workspace atual executa WSL. Foi solicitado acesso SSH ao Fedora ou o resumo
 da coleta física; enquanto isso, análise estática e preparação de integração
 continuam disponíveis.
+
+## Continuação: câmera frontal e traseira
+
+A prioridade atual é a câmera, conforme nova orientação do usuário. Veja [REA dos módulos Windows](rea/CAMERA_WINDOWS_MODULE_FINDINGS.md) e [candidato compilado e teste físico](rea/CAMERA_INTEGRATION_STATUS.md). A frontal tem tabelas de inicialização/modo idênticas às do Windows; na traseira resta uma diferença de crop/fase e o atuador DW9800 ainda não está ligado no DT. Nenhuma dessas evidências substitui a captura física.

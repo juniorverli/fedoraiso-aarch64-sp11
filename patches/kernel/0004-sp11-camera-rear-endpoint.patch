@@ -1,0 +1,21 @@
+Subject: [EXPERIMENTAL] arm64: denali: advertise rear sensor SP11 mode link frequency
+
+The camera candidate enables 4076x2806 with OV13858_LINK_FREQ_593MHZ
+(592800000 Hz), but its endpoint lists only the older 540/270 MHz modes.
+Include the already selected driver frequency without changing sensor PLL,
+clock or power settings. Source Denali DTSI retains its BSD-3-Clause notice.
+This corrects description consistency; it does not prove physical capture.
+Base: torvalds 548e7bcd0c5460ddcbca9600cea603ebeebf4da7 plus camera
+patch 16cdb32c732dde20f088c27bd1b83b269e631999c76edf1045126ff220ed3010.
+
+--- a/arch/arm64/boot/dts/qcom/x1-microsoft-denali.dtsi
++++ b/arch/arm64/boot/dts/qcom/x1-microsoft-denali.dtsi
+@@ -947,7 +947,7 @@
+ 		port {
+ 			ov13858_ep: endpoint {
+ 				data-lanes = <1 2 3 4>;
+-				link-frequencies = /bits/ 64 <540000000 270000000>;
++				link-frequencies = /bits/ 64 <592800000 540000000 270000000>;
+ 				remote-endpoint = <&csiphy1_ep>;
+ 			};
+ 		};
