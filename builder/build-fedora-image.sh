@@ -10,4 +10,5 @@ exec docker run --rm --privileged --platform linux/arm64 \
     -v "$WORKSPACE_DIR:/workspace" \
     -e FEDORA_BASE_ISO -e FEDORA_CHECKSUM_FILE -e SURFACE_KERNEL_SOURCE \
     -e SURFACE_KERNEL_VERSION -e SURFACE_ISO_OUTPUT -e SURFACE_RESUME_BUILD \
+    -e SURFACE_REUSE_ROOTFS \
     fedora:44 bash /workspace/builder/build-fedora-image.sh --inside-container

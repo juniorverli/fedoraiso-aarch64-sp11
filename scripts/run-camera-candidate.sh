@@ -2,12 +2,14 @@
 # Run the isolated camera stack without replacing distribution libraries.
 set -euo pipefail
 
-case "$(uname -r)" in
-    *[Mm]icrosoft*|*WSL*)
-        echo 'Execute no Fedora físico do Surface; WSL não fornece a câmera CSI.' >&2
-        exit 1
-        ;;
-esac
+if [[ -z ${SURFACE_CAMERA_IGNORE_WSL:-} ]]; then
+    case "$(uname -r)" in
+        *[Mm]icrosoft*|*WSL*)
+            echo 'Execute no Fedora físico do Surface; WSL não fornece a câmera CSI.' >&2
+            exit 1
+            ;;
+    esac
+fi
 
 repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 if [[ -n ${SURFACE_CAMERA_PREFIX:-} ]]; then

@@ -158,7 +158,15 @@
       "modules": [
         "qcom-camss"
       ],
-      "notes": "Camera stack is not operational; media driver presence is insufficient. No fake libcamera tuning or privacy LED hooks installed."
+      "required_files": [
+        "/opt/surface-camera/bin/cam",
+        "/opt/surface-camera/lib64/libcamera.so.0.7",
+        "/opt/surface-camera/share/libcamera/ipa/simple/imx681.yaml",
+        "/usr/local/bin/surface-cam",
+        "/usr/local/bin/surface-camera-test",
+        "/usr/local/bin/surface-camera-preview"
+      ],
+      "notes": "Candidate camera stack integrated with isolated libcamera, IMX681/OV13858 drivers and test automation. Physical hardware validation pending."
     },
     "video": {
       "modules": [

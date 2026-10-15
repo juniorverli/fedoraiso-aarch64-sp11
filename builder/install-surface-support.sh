@@ -43,6 +43,33 @@ install -m 0644 "$REPO/rpm/sources/sp11-mac-fixup/sp11-bt-mac@.service" "$ROOTFS
 # These addresses were recovered for the owner's device, not a generic fleet.
 [[ -e $ROOTFS/etc/sp11-mac.conf ]] || install -m 0600 "$REPO/rpm/sources/sp11-mac-fixup/sp11-mac.conf" "$ROOTFS/etc/sp11-mac.conf"
 
+# Isolated Surface camera candidate stack and launcher commands
+install -d "$ROOTFS/opt/surface-camera" "$ROOTFS/usr/local/bin" "$ROOTFS/etc/profile.d"
+if [[ -d $REPO/output/libcamera-integration/stage/opt/surface-camera ]]; then
+    rsync -a "$REPO/output/libcamera-integration/stage/opt/surface-camera/" "$ROOTFS/opt/surface-camera/"
+elif [[ -f $REPO/output/surface-camera-userspace-f44-aarch64.tar.gz ]]; then
+    tar --no-same-owner -xzf "$REPO/output/surface-camera-userspace-f44-aarch64.tar.gz" -C "$ROOTFS/"
+fi
+
+install -m 0755 "$REPO/scripts/run-camera-candidate.sh" "$ROOTFS/usr/local/bin/surface-cam"
+install -m 0755 "$REPO/scripts/surface-camera-test.sh" "$ROOTFS/usr/local/bin/surface-camera-test"
+install -m 0755 "$REPO/scripts/surface-camera-preview.sh" "$ROOTFS/usr/local/bin/surface-camera-preview"
+[[ ! -f $REPO/scripts/collect-camera-sensor-evidence.py ]] || install -m 0755 "$REPO/scripts/collect-camera-sensor-evidence.py" "$ROOTFS/usr/local/bin/surface-camera-evidence"
+
+for cmd in surface-cam surface-camera-test surface-camera-preview surface-camera-evidence; do
+    if [[ -x $ROOTFS/usr/local/bin/$cmd ]]; then
+        ln -sf "/usr/local/bin/$cmd" "$ROOTFS/usr/bin/$cmd"
+    fi
+done
+
+cat > "$ROOTFS/etc/profile.d/surface-camera.sh" <<'CONF'
+# Surface Pro 11 isolated camera environment
+if [[ -d /opt/surface-camera/lib64/gstreamer-1.0 ]]; then
+    export GST_PLUGIN_PATH="/opt/surface-camera/lib64/gstreamer-1.0${GST_PLUGIN_PATH:+:$GST_PLUGIN_PATH}"
+fi
+CONF
+chmod 0644 "$ROOTFS/etc/profile.d/surface-camera.sh"
+
 # Prefer the distribution's UCM, including its dispatcher. If it predates SP11,
 # add the exact profile supplied by the reviewed upstream patch in this repo.
 python3 - "$ROOTFS" "$REPO" <<'PY'

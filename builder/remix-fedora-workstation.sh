@@ -106,11 +106,15 @@ fi
 [[ -f $SQUASH/usr/lib/os-release && ! -f $SQUASH/LiveOS/rootfs.img ]] || {
     echo 'Pinned Fedora 44 base must contain a direct EROFS root' >&2; exit 1;
 }
-if [[ -e $ROOTFS ]]; then
-    mv "$ROOTFS" "$OUTPUT_DIR/workstation44-rootfs.previous.$(date +%s)"
+if [[ -n ${SURFACE_REUSE_ROOTFS:-} && -d $ROOTFS ]]; then
+    echo "Reusing prepared rootfs: $ROOTFS"
+else
+    if [[ -e $ROOTFS ]]; then
+        mv "$ROOTFS" "$OUTPUT_DIR/workstation44-rootfs.previous.$(date +%s)"
+    fi
+    mkdir -p "$ROOTFS"
+    rsync -aHAX --numeric-ids "$SQUASH/" "$ROOTFS/"
 fi
-mkdir -p "$ROOTFS"
-rsync -aHAX --numeric-ids "$SQUASH/" "$ROOTFS/"
 python3 - "$ROOTFS" <<'PY'
 import pathlib, shlex, sys
 root = pathlib.Path(sys.argv[1])
@@ -192,6 +196,16 @@ install -Dm644 "$WORKSPACE_DIR/boot/grub/grub.cfg" "$ISO_TREE/EFI/BOOT/grub.cfg"
 install -Dm644 "$WORKSPACE_DIR/boot/grub/grub.cfg" "$ISO_TREE/boot/grub/grub.cfg"
 install -Dm644 "$WORKSPACE_DIR/boot/loader/entries/fedora-sp11.conf" "$ISO_TREE/loader/entries/fedora-sp11.conf"
 install -Dm644 "$WORKSPACE_DIR/boot/loader/loader.conf" "$ISO_TREE/loader/loader.conf"
+if [[ -s $ROOTFS/boot/vmlinuz-sp11-exp && -s $ROOTFS/boot/initramfs-sp11-exp.img ]]; then
+    install -m644 "$ROOTFS/boot/vmlinuz-sp11-exp" "$ISO_TREE/vmlinuz-sp11-exp"
+    install -m644 "$ROOTFS/boot/initramfs-sp11-exp.img" "$ISO_TREE/initramfs-sp11-exp.img"
+    if [[ -s $ROOTFS/boot/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb ]]; then
+        install -Dm644 "$ROOTFS/boot/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb" "$ISO_TREE/dtb/qcom/x1p64100-microsoft-denali-exp.dtb"
+    fi
+    if [[ -s $WORKSPACE_DIR/boot/loader/entries/fedora-sp11-exp.conf ]]; then
+        install -Dm644 "$WORKSPACE_DIR/boot/loader/entries/fedora-sp11-exp.conf" "$ISO_TREE/loader/entries/fedora-sp11-exp.conf"
+    fi
+fi
 cat > "$BUILD/early.cfg" <<'GRUB'
 search --no-floppy --file --set=root /vmlinuz-sp11
 configfile ($root)/EFI/BOOT/grub.cfg
@@ -206,7 +220,9 @@ grub2-mkstandalone -O arm64-efi -o "$ISO_TREE/EFI/BOOT/BOOTAA64.EFI" \
 rm -f "$ISO_TREE/EFI/BOOT/grubaa64.efi"
 mkdir -p "$ISO_TREE/images"
 ESP="$ISO_TREE/images/efiboot.img"
-ESP_MB=$(( ($(du -cm "$ISO_TREE/vmlinuz-sp11" "$ISO_TREE/initramfs-sp11.img" "$ISO_TREE/dtb" "$ISO_TREE/EFI" "$ISO_TREE/loader" | tail -n1 | cut -f1) + 64 + 31) / 32 * 32 ))
+ESP_FILES=("$ISO_TREE/vmlinuz-sp11" "$ISO_TREE/initramfs-sp11.img" "$ISO_TREE/dtb" "$ISO_TREE/EFI" "$ISO_TREE/loader")
+[[ ! -s $ISO_TREE/vmlinuz-sp11-exp ]] || ESP_FILES+=("$ISO_TREE/vmlinuz-sp11-exp" "$ISO_TREE/initramfs-sp11-exp.img")
+ESP_MB=$(( ($(du -cm "${ESP_FILES[@]}" | tail -n1 | cut -f1) + 64 + 31) / 32 * 32 ))
 rm -f "$ESP"
 truncate -s "${ESP_MB}M" "$ESP"
 mkfs.vfat -F32 -n SP11_EFI "$ESP"
@@ -216,6 +232,9 @@ for dir in EFI/BOOT boot/grub loader/entries dtb/qcom; do
 done
 mcopy -i "$ESP" "$ISO_TREE/loader/loader.conf" ::loader/
 mcopy -i "$ESP" "$ISO_TREE/vmlinuz-sp11" "$ISO_TREE/initramfs-sp11.img" ::/
+if [[ -s $ISO_TREE/vmlinuz-sp11-exp && -s $ISO_TREE/initramfs-sp11-exp.img ]]; then
+    mcopy -i "$ESP" "$ISO_TREE/vmlinuz-sp11-exp" "$ISO_TREE/initramfs-sp11-exp.img" ::/
+fi
 # Apply the real Workstation policy to copied and generated Surface files.
 # Container host policy is unrelated; never disable enforcement in the target.
 FILE_CONTEXTS="$ROOTFS/etc/selinux/targeted/contexts/files/file_contexts"

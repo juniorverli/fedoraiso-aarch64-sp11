@@ -14,17 +14,42 @@ Artefatos locais:
 
 | Arquivo | Conteúdo |
 |---|---|
+| `output/fedora-44-workstation-surface-pro-11-lcd.iso` | Imagem ISO remasterizada com dual-boot live (kernel padrão seguro + candidato experimental com câmeras) e comandos pré-instalados |
 | `output/surface-camera-userspace-f44-aarch64.tar.gz` | Prefixo isolado `opt/surface-camera`, launcher `usr/local/bin/surface-cam` e manifesto |
 | `output/surface-camera-kernel-x1p1-aarch64.tar.gz` | Kernel diagnóstico, DTB LCD, configuração, módulos em `usr/lib/modules` e manifesto; initramfs deve ser gerado no Fedora alvo |
 | `output/surface-camera-SHA256SUMS` | Hashes dos bundles para conferir antes de extrair |
 
-A ISO/kernel integrado experimental de commits anteriores permanece uma opção de teste. **Comece identificando o kernel em uso:** se já contém os drivers, o userspace pode ser testado sem instalar outro kernel. O kernel diagnóstico deste bundle serve para isolar a câmera; não é promoção do port de áudio protegido nem comprovação de segurança dos speakers.
+A ISO agora inclui a entrada live **"Fedora Workstation 44 Live (Surface Pro 11 — Camera & Audio Candidate)"** no GRUB e os comandos pré-instalados em `/usr/bin` e `/usr/local/bin`.
 
-[Fontes fixadas e receita de build/empacotamento](CAMERA_BUILD_REPRODUCTION.md). O bundle userspace final foi compilado com release/O2, stripped e suporte SoftISP GLES habilitado; a aceleração em hardware permanece sem teste físico. O helper C++ IMX681 foi exercitado para factory, black level e conversão de ganho. Os tars foram confrontados integralmente com seus manifestos: 45 arquivos/4 links no userspace e 3784 arquivos no kernel.
+## 1. Teste direto na ISO (comandos pré-instalados)
 
-## 1. Primeiro teste: identificar e enumerar
+Ao inicializar o Surface pelo pendrive da ISO:
+1. No menu do GRUB, selecione **`Fedora Workstation 44 Live (Surface Pro 11 — Camera & Audio Candidate)`** para carregar os módulos CAMSS, IMX681 e OV13858.
+2. Abra o terminal na sessão GNOME e execute o teste automatizado:
 
-No Fedora físico, como usuário da sessão GNOME:
+```sh
+surface-camera-test
+```
+
+O comando executa automaticamente:
+- Verificação do kernel e carga dos módulos `qcom_camss`, `imx681` e `ov13858`.
+- Enumeração de câmeras com `surface-cam --list`.
+- Captura de 3 frames RAW e 3 frames de preview PPM para cada câmera detectada.
+- Verificação dos cabeçalhos PPM e integridade dos arquivos.
+- Coleta de telemetria e logs do kernel (`journalctl -k`).
+- Apresentação do resumo com os hashes SHA256 em `$HOME/surface-camera-test-...`.
+
+Para preview interativo em tela (Wayland / GStreamer):
+```sh
+surface-camera-preview front   # Câmera frontal
+surface-camera-preview rear    # Câmera traseira
+```
+
+---
+
+## 2. Teste manual via bundles (em instalação prévia)
+
+Se você estiver em um Fedora já instalado sem a ISO atualizada, use os bundles manuais:
 
 ```sh
 uname -r
