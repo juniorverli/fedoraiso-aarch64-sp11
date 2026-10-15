@@ -95,8 +95,7 @@ fi
 if [[ -z "$front_id" && -z "$rear_id" ]]; then
     echo -e "\n${YELLOW}[WARN] No Surface cameras were enumerated by libcamera.${NC}"
     echo "Possible causes:"
-    echo "  1. Running the safe default kernel instead of the candidate."
-    echo "     Reboot and select 'Surface Pro 11 — Camera & Audio Candidate' in the GRUB menu."
+    echo "  1. Running an unsupported kernel (current kernel: $(uname -r))."
     echo "  2. Sensor hardware not powered or probe error in CAMSS."
     echo "     Check kernel log: sudo dmesg | grep -iE 'camss|imx681|ov13858|csi'"
     exit 2

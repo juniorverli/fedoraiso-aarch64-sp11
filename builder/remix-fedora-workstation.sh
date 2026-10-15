@@ -126,15 +126,7 @@ if not (data.get('ID') == 'fedora' and data.get('VERSION_ID') == '44' and data.g
 if not list((root / 'usr/share/wayland-sessions').glob('*gnome*.desktop')) or not any((root / p).exists() for p in ('usr/bin/anaconda', 'usr/sbin/anaconda')):
     raise SystemExit('Official GNOME Wayland session or Anaconda is absent')
 PY
-if [[ -n ${SURFACE_KERNEL_VERSION:-} ]]; then
-    KVER="$SURFACE_KERNEL_VERSION"
-else
-    mapfile -t KERNEL_VERSIONS < <(find "$KERNEL_SOURCE/usr/lib/modules" -mindepth 1 -maxdepth 1 -type d -printf '%f\n')
-    [[ ${#KERNEL_VERSIONS[@]} == 1 ]] || {
-        echo 'Set SURFACE_KERNEL_VERSION when the source does not contain exactly one kernel directory' >&2; exit 1;
-    }
-    KVER="${KERNEL_VERSIONS[0]}"
-fi
+KVER="${SURFACE_KERNEL_VERSION:-7.2.0-sp11-exp}"
 [[ -s $KERNEL_SOURCE/usr/lib/modules/$KVER/vmlinuz ]] || { echo "Missing source kernel: $KVER" >&2; exit 1; }
 KERNEL_VERSION="$KVER" bash "$WORKSPACE_DIR/builder/install-surface-support.sh" "$ROOTFS" "$KERNEL_SOURCE"
 install -Dm644 "$ROOTFS/usr/lib/modules/$KVER/vmlinuz" "$ROOTFS/boot/vmlinuz-sp11"
@@ -196,16 +188,6 @@ install -Dm644 "$WORKSPACE_DIR/boot/grub/grub.cfg" "$ISO_TREE/EFI/BOOT/grub.cfg"
 install -Dm644 "$WORKSPACE_DIR/boot/grub/grub.cfg" "$ISO_TREE/boot/grub/grub.cfg"
 install -Dm644 "$WORKSPACE_DIR/boot/loader/entries/fedora-sp11.conf" "$ISO_TREE/loader/entries/fedora-sp11.conf"
 install -Dm644 "$WORKSPACE_DIR/boot/loader/loader.conf" "$ISO_TREE/loader/loader.conf"
-if [[ -s $ROOTFS/boot/vmlinuz-sp11-exp && -s $ROOTFS/boot/initramfs-sp11-exp.img ]]; then
-    install -m644 "$ROOTFS/boot/vmlinuz-sp11-exp" "$ISO_TREE/vmlinuz-sp11-exp"
-    install -m644 "$ROOTFS/boot/initramfs-sp11-exp.img" "$ISO_TREE/initramfs-sp11-exp.img"
-    if [[ -s $ROOTFS/boot/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb ]]; then
-        install -Dm644 "$ROOTFS/boot/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb" "$ISO_TREE/dtb/qcom/x1p64100-microsoft-denali-exp.dtb"
-    fi
-    if [[ -s $WORKSPACE_DIR/boot/loader/entries/fedora-sp11-exp.conf ]]; then
-        install -Dm644 "$WORKSPACE_DIR/boot/loader/entries/fedora-sp11-exp.conf" "$ISO_TREE/loader/entries/fedora-sp11-exp.conf"
-    fi
-fi
 cat > "$BUILD/early.cfg" <<'GRUB'
 search --no-floppy --file --set=root /vmlinuz-sp11
 configfile ($root)/EFI/BOOT/grub.cfg
@@ -221,7 +203,6 @@ rm -f "$ISO_TREE/EFI/BOOT/grubaa64.efi"
 mkdir -p "$ISO_TREE/images"
 ESP="$ISO_TREE/images/efiboot.img"
 ESP_FILES=("$ISO_TREE/vmlinuz-sp11" "$ISO_TREE/initramfs-sp11.img" "$ISO_TREE/dtb" "$ISO_TREE/EFI" "$ISO_TREE/loader")
-[[ ! -s $ISO_TREE/vmlinuz-sp11-exp ]] || ESP_FILES+=("$ISO_TREE/vmlinuz-sp11-exp" "$ISO_TREE/initramfs-sp11-exp.img")
 ESP_MB=$(( ($(du -cm "${ESP_FILES[@]}" | tail -n1 | cut -f1) + 64 + 31) / 32 * 32 ))
 rm -f "$ESP"
 truncate -s "${ESP_MB}M" "$ESP"
@@ -232,9 +213,6 @@ for dir in EFI/BOOT boot/grub loader/entries dtb/qcom; do
 done
 mcopy -i "$ESP" "$ISO_TREE/loader/loader.conf" ::loader/
 mcopy -i "$ESP" "$ISO_TREE/vmlinuz-sp11" "$ISO_TREE/initramfs-sp11.img" ::/
-if [[ -s $ISO_TREE/vmlinuz-sp11-exp && -s $ISO_TREE/initramfs-sp11-exp.img ]]; then
-    mcopy -i "$ESP" "$ISO_TREE/vmlinuz-sp11-exp" "$ISO_TREE/initramfs-sp11-exp.img" ::/
-fi
 # Apply the real Workstation policy to copied and generated Surface files.
 # Container host policy is unrelated; never disable enforcement in the target.
 FILE_CONTEXTS="$ROOTFS/etc/selinux/targeted/contexts/files/file_contexts"

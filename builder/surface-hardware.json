@@ -156,7 +156,9 @@
     },
     "camera": {
       "modules": [
-        "qcom-camss"
+        "qcom-camss",
+        "imx681",
+        "ov13858"
       ],
       "required_files": [
         "/opt/surface-camera/bin/cam",
@@ -166,7 +168,7 @@
         "/usr/local/bin/surface-camera-test",
         "/usr/local/bin/surface-camera-preview"
       ],
-      "notes": "Candidate camera stack integrated with isolated libcamera, IMX681/OV13858 drivers and test automation. Physical hardware validation pending."
+      "notes": "Unified camera stack integrated directly into the distribution with isolated libcamera, IMX681/OV13858 drivers and test automation. Physical hardware validation pending."
     },
     "video": {
       "modules": [

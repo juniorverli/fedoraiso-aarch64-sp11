@@ -58,15 +58,3 @@ printf "    devicetree '%s'\n" "$(quote "$dtb_path")"
 printf "    linux '%s'" "$(quote "$linux_path")"
 for arg in "${args[@]}"; do printf " '%s'" "$(quote "$arg")"; done
 printf "\n    initrd '%s'\n}\n" "$(quote "$initrd_path")"
-
-if [[ -s $bootdir/vmlinuz-sp11-exp && -s $bootdir/initramfs-sp11-exp.img && -s $bootdir/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb ]]; then
-    linux_exp_path=$(make_system_path_relative_to_its_root "$bootdir/vmlinuz-sp11-exp")
-    initrd_exp_path=$(make_system_path_relative_to_its_root "$bootdir/initramfs-sp11-exp.img")
-    dtb_exp_path=$(make_system_path_relative_to_its_root "$bootdir/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb")
-    printf "menuentry 'Fedora Workstation 44 — Surface Pro 11 LCD (Experimental: Cameras + Speaker Protection)' --class fedora --class gnu-linux --unrestricted --id surface-sp11-exp {\n"
-    prepare_grub_to_access_device "$boot_device" | sed 's/^/    /'
-    printf "    devicetree '%s'\n" "$(quote "$dtb_exp_path")"
-    printf "    linux '%s'" "$(quote "$linux_exp_path")"
-    for arg in "${args[@]}"; do printf " '%s'" "$(quote "$arg")"; done
-    printf "\n    initrd '%s'\n}\n" "$(quote "$initrd_exp_path")"
-fi

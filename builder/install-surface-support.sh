@@ -5,7 +5,7 @@ set -euo pipefail
 ROOTFS=$(realpath "${1:?usage: $0 ROOTFS [KERNEL_SOURCE_ROOTFS]}")
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 KERNEL_SOURCE=$(realpath "${2:-$REPO/output/rootfs}")
-KERNEL_VERSION=${KERNEL_VERSION:-7.2.8-arch1-3-sp11}
+KERNEL_VERSION=${KERNEL_VERSION:-7.2.0-sp11-exp}
 [[ $EUID == 0 && $ROOTFS != / && $ROOTFS != "$KERNEL_SOURCE" ]] || { echo 'Run as root with a separate extracted Workstation rootfs.' >&2; exit 1; }
 grep -Eq '^VERSION_ID="?44"?$' "$ROOTFS/etc/os-release"
 grep -Eq '^VARIANT_ID="?workstation"?$' "$ROOTFS/etc/os-release"

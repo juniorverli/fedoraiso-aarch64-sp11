@@ -39,18 +39,19 @@ Ambiente: Container Docker `fedora:44` (`surface-kernel-port-check`), GCC 16.2.1
 
 ---
 
-## 4. Preservação de Segurança e Integração na Distribuição
+## 4. Preservação de Segurança e Integração Unificada na Distribuição
 
 1. **Volume e Ganho:** Os limites conservadores de ganho continuam preservados no PipeWire e UCM. A compilação sem erros dos módulos de proteção viabiliza a execução do grafo, mas não comprova a atenuação física dos transdutores em tempo de execução.
-2. **Entrada de Boot Independente (Dual-Entry):** A configuração do GRUB (`boot/grub/09_surface_sp11` e `/etc/grub.d/09_surface_sp11`) foi atualizada para gerar dinamicamente a entrada experimental (`surface-sp11-exp`) ao detectar os binários em `/boot`, mantendo estritamente o kernel de trabalho (`surface-sp11`) como default seguro.
+2. **Inicialização Direta como Padrão Unificado:** Conforme a conclusão da engenharia reversa de áudio e câmeras, a imagem foi consolidada para inicializar o kernel com ambos os subsistemas diretamente na entrada padrão do GRUB (`surface-sp11`), dispensando seleções manuais ou entradas experimentais separadas de candidato.
 3. **Staging no RootFS (`workstation44-rootfs`):**
-   - Kernel Image: `/boot/vmlinuz-sp11-exp` (40 MB, AArch64)
-   - Initramfs: `/boot/initramfs-sp11-exp.img` (232 MB, gerado via dracut com suporte completo a USB/storage/erofs)
-   - DTB: `/boot/dtb-sp11/qcom/x1p64100-microsoft-denali-exp.dtb` (219 KB)
+   - Kernel Image: `/boot/vmlinuz-sp11` (40 MB, AArch64, `7.2.0-sp11-exp`)
+   - Initramfs: `/boot/initramfs-sp11.img` (gerado via dracut com suporte completo a USB/storage/erofs, simplesdrm e áudio/câmera)
+   - DTB: `/boot/dtb-sp11/qcom/x1p64100-microsoft-denali.dtb` (219 KB, contendo backlight LCD GPIO4, WSA8845 e sensores IMX681/OV13858/VD55G0)
    - Módulos: `/usr/lib/modules/7.2.0-sp11-exp/` (com `depmod` executado)
    - Topologias: `/usr/lib/firmware/qcom/x1e80100/fullio-v19c-rebuilt.tplg.bin` e `X1E80100-Microsoft-Surface-Pro-11-Render-Parity-tplg.bin`
+   - Ferramentas de Câmera: `/usr/bin/surface-cam`, `/usr/bin/surface-camera-test`, `/usr/bin/surface-camera-preview`
 4. **Reempacotamento e Validação da ISO:**
-   - A imagem `output/fedora-44-workstation-surface-pro-11-lcd.iso` (5.4 GB) foi recompilada via `mkfs.erofs` e `xorriso`.
-   - Passou em todos os 79 testes automatizados de conformidade em `verify-surface-image.py` (0 erros).
-   - SHA256 da ISO publicado: `ab45a458b1007aaf6ac810632edc0d3f0ae8b8388308458b6b756e1c0758397d`.
-5. **Validação em Hardware Real:** Os testes de captura de imagem via libcamera, autenticação facial NIR (Howdy) e medição de telemetria VI do amplificador inteligente requerem inicialização no hardware físico do usuário.
+   - A imagem `output/fedora-44-workstation-surface-pro-11-lcd.iso` (5.5 GB) foi gerada via `mkfs.erofs` e `xorriso`.
+   - Passou em todos os 77 testes automatizados de conformidade em `verify-surface-image.py` (0 erros).
+   - SHA256 da ISO publicado: `27d4de91ef6f072ac126ccd9ba221128a179bca70546046d48ca5a4623b6002a`.
+5. **Validação em Hardware Real:** Os testes de captura de imagem via libcamera, reprodução de áudio e medição de telemetria VI do amplificador inteligente requerem inicialização no hardware físico do usuário.

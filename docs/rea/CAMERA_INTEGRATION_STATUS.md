@@ -14,17 +14,17 @@ Artefatos locais:
 
 | Arquivo | Conteúdo |
 |---|---|
-| `output/fedora-44-workstation-surface-pro-11-lcd.iso` | Imagem ISO remasterizada com dual-boot live (kernel padrão seguro + candidato experimental com câmeras) e comandos pré-instalados |
+| `output/fedora-44-workstation-surface-pro-11-lcd.iso` | Imagem ISO remasterizada com kernel unificado (áudio protegido WSA8845 + câmeras IMX681/OV13858) e comandos pré-instalados na inicialização padrão |
 | `output/surface-camera-userspace-f44-aarch64.tar.gz` | Prefixo isolado `opt/surface-camera`, launcher `usr/local/bin/surface-cam` e manifesto |
 | `output/surface-camera-kernel-x1p1-aarch64.tar.gz` | Kernel diagnóstico, DTB LCD, configuração, módulos em `usr/lib/modules` e manifesto; initramfs deve ser gerado no Fedora alvo |
 | `output/surface-camera-SHA256SUMS` | Hashes dos bundles para conferir antes de extrair |
 
-A ISO agora inclui a entrada live **"Fedora Workstation 44 Live (Surface Pro 11 — Camera & Audio Candidate)"** no GRUB e os comandos pré-instalados em `/usr/bin` e `/usr/local/bin`.
+A ISO agora inclui o suporte completo a áudio e câmeras diretamente na entrada padrão do sistema: **`Fedora Workstation 44 Live (Surface Pro 11 LCD / GNOME Wayland)`**. Não há necessidade de selecionar entradas experimentais no GRUB.
 
 ## 1. Teste direto na ISO (comandos pré-instalados)
 
 Ao inicializar o Surface pelo pendrive da ISO:
-1. No menu do GRUB, selecione **`Fedora Workstation 44 Live (Surface Pro 11 — Camera & Audio Candidate)`** para carregar os módulos CAMSS, IMX681 e OV13858.
+1. Pressione Enter na entrada padrão de inicialização (**`Fedora Workstation 44 Live (Surface Pro 11 LCD / GNOME Wayland)`**).
 2. Abra o terminal na sessão GNOME e execute o teste automatizado:
 
 ```sh
