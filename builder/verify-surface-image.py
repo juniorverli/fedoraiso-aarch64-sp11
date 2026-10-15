@@ -88,7 +88,7 @@ def boot_requirements(modular, builtin, initrd_names):
     required = ['usb_storage', 'uas', 'xhci_hcd', 'xhci_plat_hcd', 'dwc3',
                 'dwc3_qcom', 'phy_qcom_qmp_combo', 'phy_qcom_qusb2',
                 'isofs', 'squashfs', 'erofs', 'overlay', 'loop', 'dm_mod',
-                'simpledrm', 'msm', 'panel_edp']
+                'msm', 'panel_edp']
     for module in required:
         if module in builtin:
             continue

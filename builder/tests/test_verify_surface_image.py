@@ -16,7 +16,7 @@ class BootPayloadTests(unittest.TestCase):
         self.modules = ['usb_storage', 'uas', 'xhci_hcd', 'xhci_plat_hcd', 'dwc3',
                         'dwc3_qcom', 'phy_qcom_qmp_combo', 'phy_qcom_qusb2',
                         'isofs', 'squashfs', 'erofs', 'overlay', 'loop', 'dm_mod',
-                        'simpledrm', 'msm', 'panel_edp']
+                        'msm', 'panel_edp']
 
     def test_old_initrd_without_usb_storage_fails(self):
         modular = {name: pathlib.Path(name + '.ko.zst') for name in self.modules}
