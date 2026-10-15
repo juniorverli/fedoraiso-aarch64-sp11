@@ -26,6 +26,7 @@ rootflags=
 for arg in "${inherited[@]}"; do
     case $arg in
         root=*|rootfstype=*|rd.live.*|boot=live|liveimg|inst.stage2=*) ;;
+        earlycon=*|earlycon|keep_bootcon|rd.plymouth=*|plymouth.enable=*) ;;
         rootflags=*) rootflags=${arg#rootflags=};;
         *) args+=("$arg");;
     esac

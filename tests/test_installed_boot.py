@@ -89,12 +89,15 @@ print(os.environ['TEST_FSROOT'] if 'FSROOT' in sys.argv else os.environ['TEST_FS
         self.assertEqual(output.count("'rootflags="), 1)
 
     def test_explicit_btrfs_subvolume_preserved_live_args_removed(self):
-        output = self.generate(filesystem="btrfs", fsroot="/@root", cmdline="root=live:CDLABEL=FEDORA_SP11 rd.live.image inst.stage2=hd:LABEL=OLD rootflags=subvolid=256,compress=zstd ro")
+        output = self.generate(filesystem="btrfs", fsroot="/@root", cmdline="root=live:CDLABEL=FEDORA_SP11 rd.live.image earlycon=efifb keep_bootcon rd.plymouth=0 plymouth.enable=0 inst.stage2=hd:LABEL=OLD rootflags=subvolid=256,compress=zstd ro")
         self.assertIn("'rootflags=subvolid=256,compress=zstd'", output)
         self.assertIn("'ro'", output)
         self.assertNotIn("CDLABEL", output)
         self.assertNotIn("rd.live", output)
         self.assertNotIn("inst.stage2", output)
+        self.assertNotIn("earlycon", output)
+        self.assertNotIn("keep_bootcon", output)
+        self.assertNotIn("plymouth.enable", output)
 
     def test_live_root_does_not_generate_installed_entry(self):
         self.assertEqual(self.generate(filesystem="overlay"), "")
