@@ -1,0 +1,7 @@
+[core]
+project_name = "surface"
+output_folder = "{project-root}/_bmad-output"
+
+[modules.method]
+implementation_artifacts = "{project-root}/_bmad-output/implementation-artifacts"
+planning_artifacts = "{project-root}/_bmad-output/planning-artifacts"

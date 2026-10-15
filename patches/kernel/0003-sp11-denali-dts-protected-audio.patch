@@ -1,0 +1,162 @@
+From 3232e1dacdeb580a10a9cb8d4756a4518a7bd83e Mon Sep 17 00:00:00 2001
+From: geocausa <geocausa@users.noreply.github.com>
+Date: Mon, 5 Oct 2026 12:00:00 +0000
+Subject: [PATCH] arm64: dts: qcom: x1-microsoft-denali: add WSA8845 speaker protection and DMIC clock
+
+Add WSA VI (voltage/current) and CPS feedback DAI links, configure
+WSA8845 smart speaker amplifiers with #sound-dai-cells = <1>, CPS and
+VISENSE port overrides, and set DMIC sample rate to 4.8 MHz (DIV4 selector)
+while preserving the LCD panel backlight on PMIC GPIO 4.
+
+Attribution: geocausa/SP11X1e-audio
+License: BSD-3-Clause / GPL-2.0
+---
+--- a/Documentation/devicetree/bindings/sound/qcom,wsa8840.yaml
++++ b/Documentation/devicetree/bindings/sound/qcom,wsa8840.yaml
+@@ -40,8 +40,32 @@
+     minItems: 6
+     maxItems: 6
+ 
++  qcom,enable-cps:
++    type: boolean
++    description: Enable the dedicated CPS SoundWire source DAI on data port 6.
++
++  qcom,cps-offset1:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    maximum: 255
++    description: |
++      Slave-only SoundWire DP6 OffsetCtrl1 override for CPS. This does not
++      change the physical master-port schedule selected by qcom,port-mapping.
++
++  qcom,visense-channel-mask:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    minimum: 1
++    maximum: 255
++    description: |
++      Native WSA data-port-5 channel-enable mask for the VISENSE protection
++      sidechain. If absent, the codec default is used.
++
+   '#sound-dai-cells':
+-    const: 0
++    enum: [0, 1]
++    description: |
++      Zero selects the legacy single speaker-playback DAI. With one cell,
++      DAI 0 is speaker playback, DAI 1 is the render-coupled VISENSE
++      protection-feedback sidechain, and DAI 2 is the dedicated CPS feedback
++      sidechain when qcom,enable-cps is present.
+ 
+   vdd-1p8-supply: true
+   vdd-io-supply: true
+--- a/arch/arm64/boot/dts/qcom/x1-microsoft-denali.dtsi
++++ b/arch/arm64/boot/dts/qcom/x1-microsoft-denali.dtsi
+@@ -339,7 +339,7 @@
+ 
+ 	sound {
+ 		compatible = "qcom,x1e80100-sndcard";
+-		model = "X1E80100-Microsoft-Surface-Pro-11";
++		model = "X1E80100-Microsoft-Surface-Pro-11-Render-Parity";
+ 		audio-routing = "SpkrLeft IN", "WSA WSA_SPK1 OUT",
+ 				"SpkrRight IN", "WSA WSA_SPK2 OUT",
+ 				"VA DMIC0", "vdd-micb",
+@@ -349,7 +349,7 @@
+ 			link-name = "WSA Playback";
+ 
+ 			codec {
+-				sound-dai = <&left_spkr>, <&right_spkr>,
++				sound-dai = <&left_spkr 0>, <&right_spkr 0>,
+ 					    <&swr0 0>, <&lpass_wsamacro 0>;
+ 			};
+ 
+@@ -362,6 +362,51 @@
+ 			};
+ 		};
+ 
++		wsa-vi-dai-link {
++			link-name = "WSA VI Protection";
++
++			/*
++			 * One two-channel Windows-equivalent feedback transport:
++			 * amplifier VISENSE ports 10/11 -> WSA macro VI ->
++			 * SoundWire DIN0 -> AudioReach WSA TX0.
++			 */
++			codec {
++				sound-dai = <&left_spkr 1>, <&right_spkr 1>,
++					    <&swr0 9>, <&lpass_wsamacro 2>;
++			};
++
++			cpu {
++				sound-dai = <&q6apmbedai WSA_CODEC_DMA_TX_0>;
++			};
++
++			platform {
++				sound-dai = <&q6apm>;
++			};
++		};
++
++		wsa-cps-dai-link {
++			link-name = "WSA CPS Protection";
++
++			/*
++			 * Dedicated CPS sidechain: both WSA8845 DP6 sources share
++			 * physical SoundWire master port 13.  swr0 DAI 10 is only
++			 * the independent ASoC/SoundWire stream handle; qcom,port-mapping
++			 * below remains authoritative for the physical master ports.
++			 */
++			codec {
++				sound-dai = <&left_spkr 2>, <&right_spkr 2>,
++					    <&swr0 10>, <&lpass_wsamacro 4>;
++			};
++
++			cpu {
++				sound-dai = <&q6apmbedai WSA_CODEC_DMA_TX_1>;
++			};
++
++			platform {
++				sound-dai = <&q6apm>;
++			};
++		};
++
+ 		va-dai-link {
+ 			link-name = "VA Capture";
+ 
+@@ -1166,7 +1211,7 @@
+ 	pinctrl-names = "default";
+ 
+ 	vdd-micb-supply = <&vreg_l1b_1p8>;
+-	qcom,dmic-sample-rate = <3200000>;
++	qcom,dmic-sample-rate = <4800000>;
+ };
+ 
+ &mdss {
+@@ -1397,11 +1442,14 @@
+ 		compatible = "sdw20217020400";
+ 		reg = <0 0>;
+ 		reset-gpios = <&lpass_tlmm 12 GPIO_ACTIVE_LOW>;
+-		#sound-dai-cells = <0>;
++		#sound-dai-cells = <1>;
+ 		sound-name-prefix = "SpkrLeft";
+ 		vdd-1p8-supply = <&vreg_l15b_1p8>;
+ 		vdd-io-supply = <&vreg_l12b_1p2>;
+ 		qcom,port-mapping = <1 2 3 7 10 13>;
++		qcom,visense-channel-mask = <3>;
++		qcom,enable-cps;
++		qcom,cps-offset1 = <0>;
+ 	};
+ 
+ 	/* WSA8845, Right Speaker */
+@@ -1409,11 +1457,14 @@
+ 		compatible = "sdw20217020400";
+ 		reg = <0 1>;
+ 		reset-gpios = <&lpass_tlmm 12 GPIO_ACTIVE_LOW>;
+-		#sound-dai-cells = <0>;
++		#sound-dai-cells = <1>;
+ 		sound-name-prefix = "SpkrRight";
+ 		vdd-1p8-supply = <&vreg_l15b_1p8>;
+ 		vdd-io-supply = <&vreg_l12b_1p2>;
+ 		qcom,port-mapping = <4 5 6 7 11 13>;
++		qcom,visense-channel-mask = <3>;
++		qcom,enable-cps;
++		qcom,cps-offset1 = <25>;
+ 	};
+ };
+ 

@@ -1,0 +1,107 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+#
+# Validation Levels:
+#   - compiled-and-integrated: Built into rootfs/bootloader, verified structurally in image
+#   - physical-testing-required: Requires physical hardware execution on bare-metal Surface Pro 11
+#   - upstream-blocked: Blocked due to missing upstream Linux kernel drivers
+
+generated: 10-14-2026 22:30
+last_updated: 10-14-2026 22:30
+project: Surface-Pro-11-Fedora-AArch64
+project_key: SP11FED
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts/stories
+
+development_status:
+  # Epic 1: Compute, CPU Frequencies & S2Idle Power Management
+  epic-1-compute-and-power: in-progress
+  1-1-package-patched-kernel-and-modules: done
+  1-2-configure-s2idle-and-systemd-power-rules: done
+  1-3-validate-s2idle-deep-sleep-on-hardware: ready-for-dev
+
+  # Epic 2: PixelSense Flow LCD Display & Backlight (2880x1920@120Hz)
+  epic-2-display-lcd: in-progress
+  2-1-compile-lcd-device-tree-dtb: done
+  2-2-configure-edp-kms-and-120hz-wayland-monitors-profile: done
+  2-3-validate-pwm-backlight-and-120hz-refresh-on-hardware: ready-for-dev
+
+  # Epic 3: Graphics & Video (Adreno X1-45, Freedreno, Turnip, Iris VPU)
+  epic-3-graphics-and-video: in-progress
+  3-1-integrate-zap-shader-and-mesa-freedreno-turnip: done
+  3-2-configure-pure-wayland-gdm-environment: done
+  3-3-validate-hardware-gl-vulkan-and-video-decode-on-hardware: ready-for-dev
+
+  # Epic 4: Detachable Keyboard (Type Cover / Flex) & Precision Touchpad
+  epic-4-keyboard-and-touchpad: in-progress
+  4-1-integrate-surface-serial-hub-and-keyboard-drivers-in-initramfs: done
+  4-2-configure-libinput-quirks-and-tablet-mode-switch: done
+  4-3-validate-hotplug-attach-detach-and-backlight-on-hardware: ready-for-dev
+
+  # Epic 5: PixelSense Touchscreen & Surface Slim Pen 2 Inking
+  epic-5-touch-and-pen: in-progress
+  5-1-compile-native-aarch64-iptsd-daemon: done
+  5-2-configure-surface-pro-11-screen-presets-and-udev-rules: done
+  5-3-validate-multitouch-mpp-inking-and-haptics-on-hardware: ready-for-dev
+
+  # Epic 6: Wireless Connectivity (FastConnect 7800 Wi-Fi 7 & Bluetooth 5.4)
+  epic-6-wireless: in-progress
+  6-1-generate-and-install-wcn7850-hw20-board-bin: done
+  6-2-implement-sp11-mac-fixup-daemon-and-udev-rules: done
+  6-3-validate-wifi-association-and-bluetooth-pairing-on-hardware: ready-for-dev
+
+  # Epic 7: External Ports, USB4 / Thunderbolt 4 & Charging
+  epic-7-ports-and-power: in-progress
+  7-1-configure-ucsi-glink-and-pmic-typec-pd: done
+  7-2-configure-ps8830-retimer-and-modprobe-rules: done
+  7-3-validate-typec-charging-and-dock-displayport-on-hardware: ready-for-dev
+
+  # Epic 8: AudioReach Audio Architecture & Studio Microphones
+  epic-8-audio: in-progress
+  8-1-compile-audioreach-topology-binary-via-alsatplg: done
+  8-2-create-surface-pro-11-alsa-ucm2-profiles-and-pipewire-config: done
+  8-3-validate-stereo-speaker-output-and-studio-mic-capture-on-hardware: ready-for-dev
+
+  # Epic 9: Onboard Sensors & Qualcomm Hexagon NPU (CDSP)
+  epic-9-sensors-and-npu: in-progress
+  9-1-deploy-sensor-hwdb-matrix-and-fastrpc-rules: done
+  9-2-extract-and-install-hexagon-npu-cdsp-firmware-blobs: done
+  9-3-validate-auto-rotation-and-fastrpc-inference-on-hardware: ready-for-dev
+
+  # Epic 10: Cameras, IR Windows Hello & Status LEDs
+  epic-10-cameras-and-leds: in-progress
+  10-1-reverse-engineer-camera-csi-and-isp-drivers-via-rea: done
+  10-2-implement-privacy-led-user-proxy-service: done
+  10-3-upstream-block-qualcomm-spectra-camss-driver-implementation: backlog
+
+  # Epic 11: Image Generation & UEFI Boot Validation
+  epic-11-image-pipeline: done
+  11-1-build-fedora-41-minimal-wayland-rootfs: done
+  11-2-generate-partitioned-gpt-raw-disk-image: done
+  11-3-master-hybrid-uefi-aarch64-live-iso: done
+  11-4-validate-artifacts-and-sha256-checksums: done
+
+action_items:
+  - id: ACT-1
+    title: Execute physical bare-metal boot testing on Microsoft Surface Pro 11 LCD
+    status: open
+    owner: hardware-owner
+  - id: ACT-2
+    title: Validate Type Cover attach/detach and backlight via libinput on bare metal
+    status: open
+    owner: hardware-owner
+  - id: ACT-3
+    title: Track Linaro/Qualcomm upstream Spectra 695 CAMSS patch series for camera support
+    status: open
+    owner: kernel-dev
