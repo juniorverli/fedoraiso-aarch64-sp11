@@ -5,7 +5,7 @@ set -euo pipefail
 ROOTFS=$(realpath "${1:?usage: $0 ROOTFS [KERNEL_SOURCE_ROOTFS]}")
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 KERNEL_SOURCE=$(realpath "${2:-$REPO/output/rootfs}")
-KERNEL_VERSION=${KERNEL_VERSION:-7.2.0-sp11-exp}
+KERNEL_VERSION=${KERNEL_VERSION:-7.2.8-arch1-3-sp11}
 [[ $EUID == 0 && $ROOTFS != / && $ROOTFS != "$KERNEL_SOURCE" ]] || { echo 'Run as root with a separate extracted Workstation rootfs.' >&2; exit 1; }
 grep -Eq '^VERSION_ID="?44"?$' "$ROOTFS/etc/os-release"
 grep -Eq '^VARIANT_ID="?workstation"?$' "$ROOTFS/etc/os-release"
@@ -69,6 +69,14 @@ if [[ -d /opt/surface-camera/lib64/gstreamer-1.0 ]]; then
 fi
 CONF
 chmod 0644 "$ROOTFS/etc/profile.d/surface-camera.sh"
+
+# Libcamera system-wide configuration and sensor color tuning (SoftISP & debayering)
+install -d "$ROOTFS/etc/libcamera" "$ROOTFS/usr/share/libcamera/ipa/simple" "$ROOTFS/opt/surface-camera/share/libcamera/ipa/simple"
+install -m 0644 "$REPO/configs/libcamera/configuration.yaml" "$ROOTFS/etc/libcamera/configuration.yaml"
+install -m 0644 "$REPO/configs/libcamera/ipa/simple/imx681.yaml" "$ROOTFS/usr/share/libcamera/ipa/simple/imx681.yaml"
+install -m 0644 "$REPO/configs/libcamera/ipa/simple/ov13858.yaml" "$ROOTFS/usr/share/libcamera/ipa/simple/ov13858.yaml"
+install -m 0644 "$REPO/configs/libcamera/ipa/simple/imx681.yaml" "$ROOTFS/opt/surface-camera/share/libcamera/ipa/simple/imx681.yaml"
+install -m 0644 "$REPO/configs/libcamera/ipa/simple/ov13858.yaml" "$ROOTFS/opt/surface-camera/share/libcamera/ipa/simple/ov13858.yaml"
 
 # Prefer the distribution's UCM, including its dispatcher. If it predates SP11,
 # add the exact profile supplied by the reviewed upstream patch in this repo.

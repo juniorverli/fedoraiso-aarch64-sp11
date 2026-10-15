@@ -42,16 +42,21 @@ Ambiente: Container Docker `fedora:44` (`surface-kernel-port-check`), GCC 16.2.1
 ## 4. Preservação de Segurança e Integração Unificada na Distribuição
 
 1. **Volume e Ganho:** Os limites conservadores de ganho continuam preservados no PipeWire e UCM. A compilação sem erros dos módulos de proteção viabiliza a execução do grafo, mas não comprova a atenuação física dos transdutores em tempo de execução.
-2. **Inicialização Direta como Padrão Unificado:** Conforme a conclusão da engenharia reversa de áudio e câmeras, a imagem foi consolidada para inicializar o kernel com ambos os subsistemas diretamente na entrada padrão do GRUB (`surface-sp11`), dispensando seleções manuais ou entradas experimentais separadas de candidato.
+2. **Base Primária Consolidada no Kernel Maduro (`7.2.8-arch1-3-sp11`):** A imagem mantém o kernel `7.2.8-arch1-3-sp11` como padrão unificado da distribuição. Ele fornece suporte nativo completo à GPU Adreno X1-85 (`msm`), tabelas OPP, gerenciador de frequência `schedutil` e fontes HiDPI Terminus 16x32 para a tela PixelSense 2880x1920. Os módulos de câmera (`imx681`, `vd55g0`) foram integrados diretamente a esta árvore com o `vermagic` correspondente.
 3. **Staging no RootFS (`workstation44-rootfs`):**
-   - Kernel Image: `/boot/vmlinuz-sp11` (40 MB, AArch64, `7.2.0-sp11-exp`)
-   - Initramfs: `/boot/initramfs-sp11.img` (gerado via dracut com suporte completo a USB/storage/erofs, simplesdrm e áudio/câmera)
-   - DTB: `/boot/dtb-sp11/qcom/x1p64100-microsoft-denali.dtb` (219 KB, contendo backlight LCD GPIO4, WSA8845 e sensores IMX681/OV13858/VD55G0)
-   - Módulos: `/usr/lib/modules/7.2.0-sp11-exp/` (com `depmod` executado)
+   - Kernel Image: `/boot/vmlinuz-sp11` (14 MB, AArch64, `7.2.8-arch1-3-sp11`)
+   - Initramfs: `/boot/initramfs-sp11.img` (gerado via dracut sem `simpledrm`, com Adreno MSM assumindo `/dev/dri/card0` direto no boot)
+   - DTB: `/boot/dtb-sp11/qcom/x1p64100-microsoft-denali.dtb` (contendo backlight LCD GPIO4, WSA8845 e sensores IMX681/OV13858/VD55G0)
+   - Módulos: `/usr/lib/modules/7.2.8-arch1-3-sp11/` (com `depmod` executado e todos os 13 subsistemas do `surface-hardware.json` validados)
    - Topologias: `/usr/lib/firmware/qcom/x1e80100/fullio-v19c-rebuilt.tplg.bin` e `X1E80100-Microsoft-Surface-Pro-11-Render-Parity-tplg.bin`
-   - Ferramentas de Câmera: `/usr/bin/surface-cam`, `/usr/bin/surface-camera-test`, `/usr/bin/surface-camera-preview`
-4. **Reempacotamento e Validação da ISO:**
-   - A imagem `output/fedora-44-workstation-surface-pro-11-lcd.iso` (5.5 GB) foi gerada via `mkfs.erofs` e `xorriso`.
-   - Passou em todos os 77 testes automatizados de conformidade em `verify-surface-image.py` (0 erros).
-   - SHA256 da ISO publicado: `27d4de91ef6f072ac126ccd9ba221128a179bca70546046d48ca5a4623b6002a`.
-5. **Validação em Hardware Real:** Os testes de captura de imagem via libcamera, reprodução de áudio e medição de telemetria VI do amplificador inteligente requerem inicialização no hardware físico do usuário.
+   - Ferramentas de Câmera: `/usr/bin/surface-cam`, `/usr/bin/surface-camera-test`, `/usr/bin/surface-camera-preview` (com pipeline `bayer2rgb` integrado)
+4. **Resolução de Conflitos Gráficos e Console:**
+   - Remoção de `simpledrm` de `dracut/sp11.conf` e adição de `omit_drivers+=" simpledrm "` + `rd.driver.blacklist=simpledrm`, impedindo o fallback gráfico para LLVMpipe.
+5. **Processamento de Cores e Software ISP (SoftISP):**
+   - Sensores CSI RAW (`imx681` e `ov13858`) transmitem dados em formato Bayer bruto de 10 bits (`RAW10`).
+   - Implementada configuração global `/etc/libcamera/configuration.yaml` ativando explicitamente `software_isp: true` para o driver `qcom-camss`, forçando o pipeline `simple` da libcamera a instanciar o `SoftwareIsp` em CPU para debayering em tempo real (RGB/YUV) no PipeWire e aplicativos (Firefox, GNOME Snapshot).
+   - Implantados perfis de calibração em `/usr/share/libcamera/ipa/simple/` e `/opt/surface-camera/share/libcamera/ipa/simple/`:
+     - `imx681.yaml`: pedestal de nível de preto (`BlackLevel: 4096`), Auto White Balance (`Awb`) e Controle Automático de Ganho (`Agc`).
+     - `ov13858.yaml`: pedestal de nível de preto (`BlackLevel: 4096`), Auto White Balance (`Awb`) e Controle Automático de Ganho (`Agc`).
+   - `surface-camera-preview`: integrado com o elemento GStreamer `bayer2rgb` para conversão de cores garantida em sessões Wayland.
+6. **Validação em Hardware Real:** Os testes de captura de imagem via libcamera, reprodução de áudio e medição de telemetria VI do amplificador inteligente requerem inicialização no hardware físico do usuário.

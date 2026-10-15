@@ -1,0 +1,8 @@
+# libcamera global configuration for Microsoft Surface Pro 11
+# Ensures Qualcomm CAMSS enables Software ISP debayering and color processing
+version: 1
+pipelines:
+  simple:
+    supported_devices:
+      - driver: qcom-camss
+        software_isp: true

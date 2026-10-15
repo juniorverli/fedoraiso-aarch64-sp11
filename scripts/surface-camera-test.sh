@@ -69,15 +69,13 @@ list_output=$(surface-cam --list 2>&1) || {
 echo "$list_output"
 
 # Identify Front (IMX681) and Rear (OV13858) IDs
-front_id=$(echo "$list_output" | grep -iE 'imx681|camera@1a' | head -n1 | awk '{print $1}' | tr -d ':' || true)
-rear_id=$(echo "$list_output" | grep -iE 'ov13858|camera@10' | head -n1 | awk '{print $1}' | tr -d ':' || true)
+front_id=$(echo "$list_output" | grep -iE 'imx681|camera@1a' | head -n1 | grep -oE '\([^)]+\)' | tr -d '()' || true)
+[[ -n "$front_id" ]] || front_id=$(echo "$list_output" | grep -iE 'front' | head -n1 | grep -oE '\([^)]+\)' | tr -d '()' || true)
+[[ -n "$front_id" ]] || front_id=$(echo "$list_output" | grep -iE 'imx681|camera@1a' | head -n1 | awk '{print $1}' | tr -d ':' || true)
 
-if [[ -z "$front_id" ]]; then
-    front_id=$(echo "$list_output" | grep -oE '\([^\)]*camera@1a\)' | tr -d '()' | head -n1 || true)
-fi
-if [[ -z "$rear_id" ]]; then
-    rear_id=$(echo "$list_output" | grep -oE '\([^\)]*camera@10\)' | tr -d '()' | head -n1 || true)
-fi
+rear_id=$(echo "$list_output" | grep -iE 'ov13858|camera@10|camera@36' | head -n1 | grep -oE '\([^)]+\)' | tr -d '()' || true)
+[[ -n "$rear_id" ]] || rear_id=$(echo "$list_output" | grep -iE 'back|rear' | head -n1 | grep -oE '\([^)]+\)' | tr -d '()' || true)
+[[ -n "$rear_id" ]] || rear_id=$(echo "$list_output" | grep -iE 'ov13858|camera@10|camera@36' | head -n1 | awk '{print $1}' | tr -d ':' || true)
 
 echo -e "\n${BOLD}Enumeration Result:${NC}"
 if [[ -n "$front_id" ]]; then
