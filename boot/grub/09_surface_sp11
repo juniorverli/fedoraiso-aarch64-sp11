@@ -1,0 +1,59 @@
+#!/usr/bin/bash
+# Anaconda runs grub2-mkconfig in the installed system. Resolve that system's
+# devices here; ISO labels and the live root device must never be copied.
+set -eo pipefail
+pkgdatadir=${pkgdatadir:-/usr/share/grub}
+grub_probe=${grub_probe:-grub2-probe}
+. "$pkgdatadir/grub-mkconfig_lib"
+bootdir=${SURFACE_BOOT_DIR:-/boot}
+for file in vmlinuz-sp11 initramfs-sp11.img dtb-sp11/qcom/x1p64100-microsoft-denali.dtb; do
+    [[ -s $bootdir/$file ]] || exit 0
+done
+root_fs=$(findmnt -n -o FSTYPE --target /)
+case $root_fs in overlay|squashfs|erofs|tmpfs) exit 0;; esac
+root_uuid=$("$grub_probe" --target=fs_uuid /)
+[[ -n $root_uuid ]] || { echo 'Surface: installed root UUID could not be determined.' >&2; exit 1; }
+boot_device=$("$grub_probe" --target=device "$bootdir/vmlinuz-sp11")
+linux_path=$(make_system_path_relative_to_its_root "$bootdir/vmlinuz-sp11")
+initrd_path=$(make_system_path_relative_to_its_root "$bootdir/initramfs-sp11.img")
+dtb_path=$(make_system_path_relative_to_its_root "$bootdir/dtb-sp11/qcom/x1p64100-microsoft-denali.dtb")
+
+# Retain installed encryption/resume/console options and merge rootflags.
+# Drop live media options if an installer happened to propagate them.
+read -r -a inherited <<< "${GRUB_CMDLINE_LINUX:-} ${GRUB_CMDLINE_LINUX_DEFAULT:-}"
+args=("root=UUID=$root_uuid")
+rootflags=
+for arg in "${inherited[@]}"; do
+    case $arg in
+        root=*|rootfstype=*|rd.live.*|boot=live|liveimg|inst.stage2=*) ;;
+        rootflags=*) rootflags=${arg#rootflags=};;
+        *) args+=("$arg");;
+    esac
+done
+if [[ $root_fs == btrfs ]]; then
+    fsroot=$(findmnt -n -o FSROOT --target /)
+    case ,$rootflags, in
+        *,subvol=*|*,subvolid=*) ;;
+        *) [[ $fsroot == / ]] || rootflags="${rootflags:+$rootflags,}subvol=${fsroot#/}";;
+    esac
+fi
+[[ -z $rootflags ]] || args+=("rootflags=$rootflags")
+for required in clk_ignore_unused pd_ignore_unused arm64.nopauth systemd.mask=tpm2.target; do
+    case " ${args[*]} " in *" $required "*) ;; *) args+=("$required");; esac
+done
+quote() { printf '%s' "$1" | grub_quote; }
+# The Surface kernel is pinned and copied outside RPM management. Fedora's
+# installer may save a stock-kernel BLS default; keep the hardware entry as
+# normal default while honoring grub-reboot/firmware one-shot selections.
+# Updating this kernel/DTB/initramfs remains a manual image-maintainer action.
+cat <<'GRUB'
+if [ "${boot_once}" != "true" ]; then
+    set default='surface-sp11'
+fi
+GRUB
+printf "menuentry 'Fedora Workstation 44 — Surface Pro 11 LCD' --class fedora --class gnu-linux --unrestricted --id surface-sp11 {\n"
+prepare_grub_to_access_device "$boot_device" | sed 's/^/    /'
+printf "    devicetree '%s'\n" "$(quote "$dtb_path")"
+printf "    linux '%s'" "$(quote "$linux_path")"
+for arg in "${args[@]}"; do printf " '%s'" "$(quote "$arg")"; done
+printf "\n    initrd '%s'\n}\n" "$(quote "$initrd_path")"

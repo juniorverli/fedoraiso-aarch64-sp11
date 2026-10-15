@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "device": "Microsoft Surface Pro 11 LCD (X1P64100 / Denali)",
+  "base": "Official Fedora Workstation 44 AArch64 Live ISO",
+  "session": "GNOME Wayland; installed desktop entry selected at integration time",
+  "physical_validation": "pending",
+  "subsystems": {
+    "lcd": {
+      "modules": [
+        "msm",
+        "panel-edp",
+        "pwm_bl",
+        "leds-qcom-lpg"
+      ],
+      "notes": "LCD DTB includes local enable-gpios GPIO4/backlight changes requiring physical verification. Panel timing comes from DT/EDID; no fabricated monitors.xml."
+    },
+    "graphics": {
+      "modules": [
+        "msm"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qcom/gen70500_gmu.bin",
+        "/usr/lib/firmware/qcom/gen70500_sqe.fw",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/qcdxkmsuc8380.mbn"
+      ],
+      "required_globs": [
+        "/usr/lib64/dri/*"
+      ],
+      "notes": "Fedora Mesa Freedreno/Turnip with GNOME Wayland. Vulkan and acceleration require physical verification.",
+      "evidence": {
+        "dt_compatible": "qcom,adreno-43050c01",
+        "upstream_chip_name": "C512v2",
+        "source": "https://github.com/torvalds/linux/blob/a25fd4227f59b9147ae6d23336878c28e5437a4d/drivers/gpu/drm/msm/adreno/a6xx_catalog.c",
+        "firmware_table": [
+          "gen70500_sqe.fw",
+          "gen70500_gmu.bin"
+        ],
+        "zap_shader": "DT firmware-name overrides generic upstream zap shader"
+      }
+    },
+    "wifi": {
+      "modules": [
+        "ath12k"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/ath12k/WCN7850/hw2.0/board.bin",
+        "/usr/lib/firmware/ath12k/WCN7850/hw2.0/amss.bin",
+        "/usr/lib/firmware/ath12k/WCN7850/hw2.0/m3.bin",
+        "/usr/bin/sp11-mac-fixup",
+        "/etc/sp11-mac.conf",
+        "/etc/udev/rules.d/90-sp11-mac.rules"
+      ],
+      "notes": "Calibration and MAC configuration belong to the owner device; association and throughput not physically verified."
+    },
+    "bluetooth": {
+      "modules": [
+        "hci_uart",
+        "btqca"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qca/hpbtfw21.tlv",
+        "/usr/bin/btmgmt",
+        "/etc/systemd/system/sp11-bt-mac@.service"
+      ],
+      "required_globs": [
+        "/usr/lib/firmware/qca/hpnv21*"
+      ],
+      "notes": "BlueZ enabled; public address fixup via udev. Pairing not physically verified."
+    },
+    "touch_pen": {
+      "modules": [
+        "spi-geni-qcom",
+        "spi-hid",
+        "spi-hid-of",
+        "hid-multitouch"
+      ],
+      "required_files": [
+        "/usr/bin/iptsd",
+        "/usr/bin/iptsd-check-device",
+        "/usr/bin/iptsd-find-hidraw",
+        "/etc/systemd/system/iptsd@.service",
+        "/etc/udev/rules.d/50-iptsd.rules",
+        "/etc/iptsd.conf"
+      ],
+      "notes": "Device-triggered iptsd and input defaults. LCD size in centimetres; digitizer calibration/pen latency pending."
+    },
+    "keyboard_touchpad": {
+      "modules": [
+        "hid-microsoft",
+        "hid-multitouch",
+        "surface_hid",
+        "surface_kbd"
+      ],
+      "notes": "All kernel modules retained; Fedora libinput defaults, no guessed pressure quirks."
+    },
+    "audio": {
+      "modules": [
+        "snd-soc-x1e80100",
+        "snd-soc-wsa884x",
+        "snd-soc-lpass-va-macro",
+        "qcom_q6v5_pas",
+        "qcom_pd_mapper"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qcom/x1e80100/X1E80100-Microsoft-Surface-Pro-11-tplg.bin",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/qcadsp8380.mbn",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/adsp_dtb.mbn",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/adspr.jsn",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/adspua.jsn",
+        "/usr/share/alsa/ucm2/Qualcomm/x1e80100/MICROSOFT-Surface-Pro-11.conf",
+        "/usr/share/alsa/ucm2/Qualcomm/x1e80100/Surface11-HiFi.conf"
+      ],
+      "notes": "Prefer upstream distro UCM; patch847 profile fallback with dispatcher when absent. No invented echo cancellation or beamforming. Speaker, microphones and USB-C audio need physical verification; DP PCM probing may require display connected before PipeWire starts."
+    },
+    "sensors": {
+      "modules": [
+        "hid-sensor-hub",
+        "hid-sensor-accel-3d",
+        "hid-sensor-als"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/adsps.jsn",
+        "/usr/libexec/iio-sensor-proxy"
+      ],
+      "notes": "Driver and sensor-proxy presence does not prove sensors enumerate. Rotation, ambient light and mount matrix pending physical verification."
+    },
+    "power_usb": {
+      "modules": [
+        "qcom_battmgr",
+        "pmic_glink",
+        "pmic_glink_altmode",
+        "ucsi_glink",
+        "phy-qcom-qmp-combo",
+        "dwc3-qcom",
+        "xhci-plat-hcd"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/battmgr.jsn"
+      ],
+      "notes": "Keep Fedora UPower/logind/power profiles. Suspend, battery reporting, USB4/DP alt mode require physical verification."
+    },
+    "dsp_npu": {
+      "modules": [
+        "qcom_q6v5_pas",
+        "fastrpc",
+        "qrtr",
+        "qrtr-smd",
+        "qcom_pd_mapper"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/qccdsp8380.mbn",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/cdsp_dtb.mbn",
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/cdspr.jsn"
+      ],
+      "notes": "Firmware and drivers shipped. No working userspace inference stack or NPU acceleration claimed; no world writable FastRPC rules."
+    },
+    "camera": {
+      "modules": [
+        "qcom-camss"
+      ],
+      "notes": "Camera stack is not operational; media driver presence is insufficient. No fake libcamera tuning or privacy LED hooks installed."
+    },
+    "video": {
+      "modules": [
+        "qcom-iris"
+      ],
+      "required_files": [
+        "/usr/lib/firmware/qcom/x1e80100/microsoft/Denali/qcvss8380.mbn"
+      ],
+      "notes": "Exact firmware-name from compiled DTB. Codec device initialization and hardware decode need physical verification."
+    },
+    "installed_boot": {
+      "required_files": [
+        "/etc/grub.d/09_surface_sp11"
+      ],
+      "notes": "Executable grub2-mkconfig generator selects the custom kernel/initrd/DTB using installed filesystem UUIDs and Btrfs subvolume flags. Anaconda installed-system boot needs physical validation; this is not an Anaconda transaction test. Normal default selects Surface; GRUB boot_once is honored. Kernel is pinned/copied outside RPM and future kernel updates require rebuilding the Surface artifacts. Installed DTB is independent at /boot/dtb-sp11/qcom/x1p64100-microsoft-denali.dtb, outside the stock kernel dtb symlink."
+    }
+  }
+}
