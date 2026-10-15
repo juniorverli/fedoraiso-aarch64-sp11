@@ -6,3 +6,32 @@ __pycache__/
 firmware/blobs/qcom/x1e80100/microsoft/
 !dts/blobs/**
 !bin/iptsd
+
+# Local build products and caches (retain curated blob exceptions above).
+*.iso
+*.iso.sha256
+/build/
+/.cache/
+/.venv/
+/venv/
+.pytest_cache/
+*.py[cod]
+
+# Private hardware captures and proprietary research inputs.
+/research/camera-sensors/raw/
+/research/camera-sensors/private/
+/.rea/
+/rea.local/
+/_bmad/render/
+
+# Local credentials and editor temporary files.
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*~
+*.swp
+*.swo
+/.vscode/
+/.idea/

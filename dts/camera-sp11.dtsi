@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /*
- * Qualcomm Spectra 695 CAMSS Camera Subsystem & Sensor Definitions
- * for Microsoft Surface Pro 11 (Denali)
- *
- * Reverse engineered from Windows DriverStore:
- * - Front: Sony IMX681 (ACPI\SONY0681 / MSHW0490) on 2-lane MIPI CSI-2 (CSIPHY0 / CCI0)
- * - Rear:  OmniVision OV13858 (ACPI\OVTID858 / MSHW0491) on 4-lane MIPI CSI-2 (CSIPHY1 / CCI0)
- * - Aux/IR: STMicroelectronics VD55G0 (ACPI\SMO55F0 / MSHW0492) on 1-lane MIPI CSI-2 (CSIPHY2 / CCI1)
- *
- * NOTE: Upstream Linux does not yet contain complete CAMSS Spectra 695 ISP drivers.
- * This overlay establishes the verified pin, clock, and regulator bindings for downstream/out-of-tree testing.
+ * INACTIVE RESEARCH ONLY: unverified camera hypotheses for Surface Pro 11.
+ * Sensor identities, ACPI IDs, bus addresses, GPIOs, voltages, clocks and CSI
+ * lane maps below lack independently reproducible board-specific evidence.
+ * Do not include or enable this file in an active build. Values are not safe
+ * hardware test parameters. See docs/rea/PHASE_1_CAMERA_SENSORS.md for gates.
  */
 
 / {

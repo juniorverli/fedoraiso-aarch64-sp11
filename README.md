@@ -6,6 +6,8 @@ The builder verifies Fedora's signed CHECKSUM and the ISO SHA256, then adds the 
 
 Porting implementation from `dwhinham/archiso-aarch64-sp11`, upstream `linux-surface` / `linux-msm`, and hardware parameter reverse engineering from the Surface Pro 11 Windows 11 ARM64 subsystem.
 
+Current camera, IR and ambient-light investigation: [repository setup](docs/REPOSITORY_SETUP.md) and [Phase 1 evidence plan](docs/rea/PHASE_1_CAMERA_SENSORS.md). Fedora hardware collection is pending; WSL tooling checks are not physical evidence.
+
 ---
 
 ## 1. Verified Target Hardware Specifications
@@ -17,7 +19,7 @@ Porting implementation from `dwhinham/archiso-aarch64-sp11`, upstream `linux-sur
 - **Audio:** Qualcomm AudioReach (`q6apm`), SoundWire bus, 2x WSA8845 smart speakers, Dual Studio Mics
 - **Touch & Pen:** PixelSense Digitizer (`MSHW0484`) over QSPI 1-4-4 mode (`spi-geni-qcom` + `iptsd`)
 - **Keyboard / SAM:** Surface Serial Hub (`SSH` over `&uart2`), Precision Touchpad (`libinput`), `SW_TABLET_MODE`
-- **Cameras:** Front Sony IMX681 (`MSHW0490`), Rear OmniVision OV13858 (`MSHW0491`), Aux IR STMicroelectronics VD55G0 (`MSHW0492`)
+- **Cameras:** Legacy candidate names IMX681, OV13858 and VD55G0 and associated IDs remain unverified; identify sensors from reproducible Fedora and binary evidence.
 - **AI / NPU:** Qualcomm Hexagon NPU (CDSP / HTP - 45 TOPS) via `/dev/fastrpc-cdsp`
 
 ---
@@ -35,7 +37,7 @@ Porting implementation from `dwhinham/archiso-aarch64-sp11`, upstream `linux-sur
 | **7. Portas e Carga** | **Configurado** | Configurado | • `configs/modprobe.d/sp11-usb4.conf`<br>• Configuração GLINK e PS8830 retimers | Limitação upstream: saída externa de display em dock USB4/Surface Dock 2 ainda não opera em X1. |
 | **8. Áudio & Microfones** | **Compilado / Configurado** | Compilado | • `firmware/blobs/qcom/x1e80100/X1E80100-Microsoft-Surface-Pro-11-tplg.bin` (23 KB compilado com `alsatplg`)<br>• UCM2 HiFi profiles<br>• PipeWire filter-chain | Volume do alto-falante permanece conservador para proteção acústica enquanto o DSP de proteção não for validado. |
 | **9. Sensores e NPU** | **Configurado / Extraído** | Extraído / Configurado | • JSONs de domínio Qualcomm (`adsps.jsn`, `cdspr.jsn`, `battmgr.jsn`) em `configs/qcom/`<br>• `configs/udev/61-surface-sp11-sensor.hwdb`<br>• `configs/udev/99-fastrpc.rules` | Rotação automática e inferência via FastRPC `/dev/fastrpc-cdsp` requerem teste em sessão ativa. |
-| **10. Câmeras, IR e LEDs** | **Pesquisa / Parcial** | Engenharia Reversa | • `dts/camera-sp11.dtsi` mapeando IMX681, OV13858 e VD55G0<br>• `configs/libcamera/qcom-camss.yaml`<br>• `scripts/surface-privacy-led.sh` (via SAM) | **Limitação Upstream:** Sem driver CAMSS Spectra 695 funcional no kernel upstream. Câmeras não transmitem vídeo atualmente. |
+| **10. Câmeras, IR e LEDs** | **Pesquisa / Parcial** | Hipóteses não verificadas | • `dts/camera-sp11.dtsi` contém hipóteses inativas de sensores e conexões<br>• `configs/libcamera/qcom-camss.yaml`<br>• `scripts/surface-privacy-led.sh` (via SAM) | Identidade dos sensores, conexões e suporte no kernel em execução precisam de evidência reproduzível; veja o plano Phase 1. |
 
 ---
 
@@ -68,7 +70,7 @@ surface/
 ├── dts/
 │   ├── blobs/
 │   │   └── x1p64100-microsoft-denali.dtb # DTB compilado via dtc (205 KB)
-│   ├── camera-sp11.dtsi              # Overlay de pesquisa das câmeras (IMX681, OV13858, VD55G0)
+│   ├── camera-sp11.dtsi              # Hipóteses inativas de câmeras; nomes e conexões não verificados
 │   ├── x1-microsoft-denali.dtsi      # DTS base do Surface Pro 11
 │   └── x1p64100-microsoft-denali.dts # DTS da variante LCD com backlight PWM
 ├── firmware/
