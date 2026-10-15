@@ -58,5 +58,8 @@ Ambiente: Container Docker `fedora:44` (`surface-kernel-port-check`), GCC 16.2.1
    - Implantados perfis de calibração em `/usr/share/libcamera/ipa/simple/` e `/opt/surface-camera/share/libcamera/ipa/simple/`:
      - `imx681.yaml`: pedestal de nível de preto (`BlackLevel: 4096`), Auto White Balance (`Awb`) e Controle Automático de Ganho (`Agc`).
      - `ov13858.yaml`: pedestal de nível de preto (`BlackLevel: 4096`), Auto White Balance (`Awb`) e Controle Automático de Ganho (`Agc`).
-   - `surface-camera-preview`: integrado com o elemento GStreamer `bayer2rgb` para conversão de cores garantida em sessões Wayland.
-6. **Validação em Hardware Real:** Os testes de captura de imagem via libcamera, reprodução de áudio e medição de telemetria VI do amplificador inteligente requerem inicialização no hardware físico do usuário.
+6. **Reempacotamento e Validação da ISO:**
+   - A imagem `output/fedora-44-workstation-surface-pro-11-lcd.iso` (5.3 GB) foi gerada e validada com sucesso.
+   - Aprovada em todos os 77 testes de integridade e arquitetura em `verify-surface-image.py` (0 erros).
+   - SHA256 publicado: `6bbfb670cd8899d3a0325d28c209ac6829f4c5305d869bb2781257fc561a6a7a`.
+7. **Validação em Hardware Real:** Os testes de captura de imagem via libcamera, reprodução de áudio e medição de telemetria VI do amplificador inteligente requerem inicialização no hardware físico do usuário.
